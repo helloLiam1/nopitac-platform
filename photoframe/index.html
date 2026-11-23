@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOPITAC — Photo Frame Tool</title>
+  <meta name="description" content="NOPITAC Photo Frame Tool: Display portrait photos inside custom Nopitac Helvetica extended underline frames.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="./photoFrame.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Bar Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <span class="brand-logo">
+          NOPITAC
+          <span class="brand-bracket"></span>
+        </span>
+        <span class="brand-title">Photo Frame Tool & Underline Extension</span>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn" id="copySvgBtn" title="Copy pure vector SVG code to clipboard">Copy SVG</button>
+        <button class="btn" id="exportSvgBtn" title="Download vector SVG file">Download SVG</button>
+        <button class="btn btn-primary" id="exportPngBtn" title="Download high-resolution PNG image">Download PNG</button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="app-main">
+      
+      <!-- Left Controls Sidebar -->
+      <aside class="controls-sidebar">
+        
+        <!-- Person Name Input -->
+        <div class="control-group">
+          <label class="group-label" for="nameInput">Person Name</label>
+          <input 
+            type="text" 
+            id="nameInput" 
+            class="name-input" 
+            value="charlie maignan" 
+            placeholder="Type person name..." 
+            spellcheck="false" 
+            autocomplete="off" 
+            autofocus 
+          />
+          <div class="preset-chips">
+            <span class="preset-chip" data-name="charlie maignan">charlie maignan</span>
+            <span class="preset-chip" data-name="paula scher">paula scher</span>
+            <span class="preset-chip" data-name="yuta eunho le">yuta eunho le</span>
+            <span class="preset-chip" data-name="michael bierut">michael bierut</span>
+            <span class="preset-chip" data-name="david carson">david carson</span>
+          </div>
+        </div>
+
+        <!-- Portrait Photo Upload -->
+        <div class="control-group">
+          <label class="group-label">Portrait Photo</label>
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-icon">📷</div>
+            <div class="dropzone-text"><strong>Click to upload</strong> or drag & drop</div>
+            <div class="dropzone-sub">PNG, JPG, WebP supported</div>
+            <input type="file" id="fileInput" class="file-input-hidden" accept="image/*" />
+          </div>
+          <div class="image-preview-bar">
+            <img id="imageThumb" class="image-thumb" src="./charlie_maignan.png" alt="Thumbnail" />
+            <div class="image-info">
+              <div class="image-name" id="imageName">charlie_maignan.png</div>
+            </div>
+            <button class="btn-thumb-action" id="resetImgBtn" title="Reset to default Charlie Maignan portrait">Reset</button>
+          </div>
+        </div>
+
+        <!-- Color & Theme Selection -->
+        <div class="control-group">
+          <label class="group-label">Color Theme</label>
+          <div class="segmented-control">
+            <button class="segmented-btn active" data-theme="both">Side by Side</button>
+            <button class="segmented-btn" data-theme="light">Black on White</button>
+            <button class="segmented-btn" data-theme="dark">White on Black</button>
+          </div>
+        </div>
+
+        <!-- View Mode Selection -->
+        <div class="control-group">
+          <label class="group-label">View Mode</label>
+          <div class="segmented-control">
+            <button class="segmented-btn active" data-view="final">Final Frame</button>
+            <button class="segmented-btn" data-view="steps">5-Step Process</button>
+          </div>
+        </div>
+
+        <!-- Photo Fit & Adjustments -->
+        <div class="control-group">
+          <label class="group-label">Photo Position & Zoom</label>
+          <div class="slider-row">
+            <span>Zoom</span>
+            <span class="slider-val" id="scaleVal">105%</span>
+          </div>
+          <input type="range" id="scaleSlider" class="range-slider" min="0.5" max="3" step="0.05" value="1.05" />
+
+          <div class="slider-row" style="margin-top: 10px;">
+            <span>Pan X</span>
+            <span class="slider-val" id="panXVal">0%</span>
+          </div>
+          <input type="range" id="panXSlider" class="range-slider" min="-100" max="100" step="1" value="0" />
+
+          <div class="slider-row" style="margin-top: 10px;">
+            <span>Pan Y</span>
+            <span class="slider-val" id="panYVal">0%</span>
+          </div>
+          <input type="range" id="panYSlider" class="range-slider" min="-100" max="100" step="1" value="0" />
+        </div>
+
+        <!-- Typographic Scale & Card Layout -->
+        <div class="control-group">
+          <label class="group-label">Typography & Artboard</label>
+          <div class="slider-row">
+            <span>Font Size</span>
+            <span class="slider-val" id="fontSizeVal">32px</span>
+          </div>
+          <input type="range" id="fontSizeSlider" class="range-slider" min="16" max="64" step="2" value="32" />
+
+          <div class="toggle-row" style="margin-top: 10px;">
+            <span>Square Card Border</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="borderToggle" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Center Interactive Preview Canvas -->
+      <section class="stage-container" id="stageContainer">
+        <div class="stage-viewport" id="stageViewport">
+          <!-- Rendered SVG Frame Cards dynamically inserted here -->
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-msg" id="toast">Copied to clipboard</div>
+
+  <script type="module" src="./photoFrameApp.js"></script>
+</body>
+</html>

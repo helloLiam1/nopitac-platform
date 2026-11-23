@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" width="181.6649" height="503.363" viewBox="0 0 181.6649 503.363">
+  <text transform="translate(7.1813 20.001)" style="font-family: HelveticaNeue-Bold, &apos;Helvetica Neue&apos;; font-size: 21px; font-weight: 700;"><tspan x="0" y="0">add person</tspan></text>
+  <text transform="translate(15.0949 125.2234)" style="fill: #b3b3b3; font-family: HelveticaNeue, &apos;Helvetica Neue&apos;; font-size: 14px;"><tspan x="0" y="0">year of birth</tspan></text>
+  <polyline points="166.6034 113.2255 166.6034 134.1566 15.0951 134.1566" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+  <text transform="translate(15.0949 300.7187)" style="fill: #b3b3b3; font-family: HelveticaNeue, &apos;Helvetica Neue&apos;; font-size: 14px;"><tspan x="0" y="0">place of birth </tspan></text>
+  <polyline points="166.6021 288.7207 166.6021 309.6517 15.0951 309.6512" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+  <text transform="translate(15.0951 160.823)" style="fill: gray; font-family: HelveticaNeue-Bold, &apos;Helvetica Neue&apos;; font-size: 14px; font-weight: 700;"><tspan x="0" y="0">why do you think</tspan><tspan x="0" y="12">they are cool? *</tspan></text>
+  <polyline points="166.6021 148.8245 166.5154 274.0241 15.0951 274.1003" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+  <g>
+    <text transform="translate(15.0956 54.1675)" style="fill: gray; font-family: HelveticaNeue-Bold, &apos;Helvetica Neue&apos;; font-size: 14px; font-weight: 700;"><tspan x="0" y="0">full name *</tspan></text>
+    <polyline points="166.6019 42.1231 166.6019 63.0541 15.0951 63.053" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+  </g>
+  <polyline points="180.9149 20.001 180.9149 502.613 .7501 502.613 .7904 0" style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: 1.5px;"/>
+  <text transform="translate(15.0949 336.3403)" style="fill: #b3b3b3; font-family: HelveticaNeue, &apos;Helvetica Neue&apos;; font-size: 14px;"><tspan x="0" y="0">links</tspan></text>
+  <polyline points="166.5947 324.3425 167.1004 365.5651 15.0629 365.5651" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+  <g>
+    <text transform="translate(15.0946 392.3242)" style="fill: #b3b3b3; font-family: HelveticaNeue, &apos;Helvetica Neue&apos;; font-size: 14px;"><tspan x="0" y="0">photos</tspan></text>
+    <path d="M15.3365,443.3143v-41.2347s41.2348,0,41.2348,0c0,1.7818,0,41.2347,0,41.2347,0,0-39.9304,0-41.2347,0Z" style="fill: none; stroke: #b3b3b3; stroke-miterlimit: 10; stroke-width: .5px;"/>
+    <path d="M39.4819,422.2209v.9521h-3.0518v3.0659h-.9521v-3.0659h-3.0518v-.9521h3.0518v-3.0659h.9521v3.0659h3.0518Z" style="fill: #b3b3b3;"/>
+    <path d="M65.6264,443.3147v-41.2348s41.2348,0,41.2348,0c0,1.7818,0,41.2348,0,41.2348h-41.2348Z" style="fill: none; stroke: #b3b3b3; stroke-miterlimit: 10; stroke-width: .5px;"/>
+    <path d="M89.7762,422.2209v.9521h-3.0518v3.0659h-.9521v-3.0659h-3.0518v-.9521h3.0518v-3.0659h.9521v3.0659h3.0518Z" style="fill: #b3b3b3;"/>
+    <path d="M115.9232,443.3147v-41.2348s41.2348,0,41.2348,0c0,1.7818,0,41.2348,0,41.2348h-41.2348Z" style="fill: none; stroke: #b3b3b3; stroke-miterlimit: 10; stroke-width: .5px;"/>
+    <path d="M140.0705,422.2209v.9521h-3.0518v3.0659h-.9521v-3.0659h-3.0518v-.9521h3.0518v-3.0659h.9521v3.0659h3.0518Z" style="fill: #b3b3b3;"/>
+    <polyline points="15.0629 452.7571 166.6021 452.7571 166.6021 380.1854" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+  </g>
+  <text transform="translate(15.0956 89.7187)" style="fill: gray; font-family: HelveticaNeue-Bold, &apos;Helvetica Neue&apos;; font-size: 14px; font-weight: 700;"><tspan x="0" y="0">domain *</tspan></text>
+  <polyline points="166.6019 77.6743 166.6019 98.6053 15.0951 98.6042" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+  <polyline points="164.139 349.3627 159.7095 349.3627 159.7095 337.2102" style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: .25px;"/>
+  <line x1="15.3367" y1="337.2102" x2="166.5947" y2="337.2102" style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: .25px;"/>
+  <polyline points="164.0219 188.546 159.5924 188.546 159.5924 176.3934" style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: .25px;"/>
+  <line x1="15.2195" y1="176.3934" x2="166.4776" y2="176.3934" style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: .25px;"/>
+  <text transform="translate(74.2338 481.9983)" style="fill: gray; font-family: HelveticaNeue-Bold, &apos;Helvetica Neue&apos;; font-size: 14px; font-weight: 700;"><tspan x="0" y="0">done</tspan></text>
+  <path d="M15.0625,467.3774s0,20.7505.0166,20.9217l151.5068.0011v-20.9228" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+</svg>

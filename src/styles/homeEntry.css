@@ -1,0 +1,584 @@
+/* ==========================================================================
+   NOPITAC — Home / Entry Screen Design System
+   Exact vector match to Illustrator home.svg & After Effects entry animation
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Helvetica Neue Bold';
+  src: url('/fonts/HelveticaNeue-Bold.ttf') format('truetype'),
+       local('Helvetica Neue Bold'),
+       local('HelveticaNeue-Bold');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('/fonts/HelveticaNeue-Bold.ttf') format('truetype'),
+       local('Helvetica Neue Bold'),
+       local('HelveticaNeue-Bold');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('/fonts/HelveticaNeue-Medium.ttf') format('truetype'),
+       local('Helvetica Neue Medium'),
+       local('HelveticaNeue-Medium');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: local('Helvetica Neue'),
+       local('HelveticaNeue');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --home-bg: #ffffff;
+  --home-black: #000000;
+  --home-white: #ffffff;
+  --current-accent-color: #f5003a; /* Defaults to domain red */
+  --stage-width: 1440px;
+  --stage-height: 900px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body.home-body {
+  background-color: var(--home-bg);
+  color: var(--home-black);
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ==========================================================================
+   Centered Scaled Viewport Container (Maintains 1440x900 aspect ratio)
+   ========================================================================== */
+.home-viewport {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--stage-width);
+  height: var(--stage-height);
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+  overflow: hidden;
+  background-color: var(--home-bg);
+}
+
+/* ==========================================================================
+   Lottie Vector Animation Container
+   ========================================================================== */
+.home-lottie-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.home-lottie-container svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ==========================================================================
+   Interactive Overlay SVG Layer (1440x900 coordinates)
+   ========================================================================== */
+.home-overlay-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Hit-box for the central logo definition rectangle */
+.box-hit-area {
+  pointer-events: all;
+  cursor: pointer;
+  fill: transparent;
+}
+
+/* ==========================================================================
+   Sign In & Sign Up Interactive Buttons
+   Exact match to button_sign up.svg and button_sign in.svg
+   Helvetica Neue Bold 28px, kerning -32 (-0.032em)
+   ========================================================================== */
+.home-btn-group {
+  pointer-events: all;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.home-btn-group.visible {
+  opacity: 1;
+}
+
+.home-btn-hitbox {
+  fill: transparent;
+  pointer-events: all;
+}
+
+.home-btn-bracket {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 2px;
+  stroke-miterlimit: 10;
+  transition: stroke 0.2s ease;
+}
+
+.home-btn-text {
+  font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: -0.032em; /* -32 kerning */
+  fill: #000000;
+  user-select: none;
+  pointer-events: none;
+  transition: fill 0.2s ease;
+}
+
+/* Hover effect: underline changes to the active rectangle color, text is black */
+.home-btn-group:hover .home-btn-bracket,
+.home-btn-group:focus-visible .home-btn-bracket {
+  stroke: var(--current-accent-color, #f5003a);
+}
+
+.home-btn-group:hover .home-btn-text,
+.home-btn-group:focus-visible .home-btn-text {
+  fill: #000000;
+}
+
+.home-btn-group:active {
+  transform: scale(0.985);
+}
+
+/* ==========================================================================
+   Full-Screen Split Auth Screen (Sign In / Sign Up)
+   Exact vector match to Illustrator sign in.svg & sign up.svg
+   ========================================================================== */
+.auth-screen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #ffffff;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.20s ease-out, visibility 0.20s;
+  overflow: hidden;
+}
+
+.auth-screen.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Left Half: 50% width, full height.
+   The rectangle with the half underline fills up the left half of the screen
+   with the SAME amount of white space left from all sides.
+   -------------------------------------------------------------------------- */
+.auth-half-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50vw;
+  height: 100vh;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.auth-poster-box {
+  position: absolute;
+  top: var(--auth-poster-margin, 48px);
+  bottom: var(--auth-poster-margin, 48px);
+  left: var(--auth-poster-margin, 48px);
+  right: var(--auth-poster-margin, 48px);
+  box-sizing: border-box;
+}
+
+.auth-poster-rect {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: var(--auth-accent-color, #6a76ff);
+  transition: background-color 0.3s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* The half underline on the left (black L-border) */
+.auth-poster-borders {
+  position: absolute;
+  inset: 0;
+  border-left: 26.4px solid #000000;
+  border-bottom: 26.4px solid #000000;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+/* 'you’re quite cool!' text in bottom left */
+.auth-poster-text {
+  position: absolute;
+  left: clamp(48px, 4.5vw, 64px);
+  bottom: clamp(48px, 5.5vh, 68px);
+  color: #ffffff;
+  font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: clamp(44px, min(5.6vw, 8.2vh), 84px);
+  font-weight: 700;
+  line-height: 0.902;
+  letter-spacing: -0.03em;
+  user-select: none;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --------------------------------------------------------------------------
+   Right Half: 50% width, full height.
+   All information (welcome, fields, etc.) grouped and in the CENTER of this half.
+   -------------------------------------------------------------------------- */
+.auth-half-right {
+  position: absolute;
+  top: 0;
+  left: 50vw;
+  width: 50vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 32px 16px;
+}
+
+/* The centered group container on the right */
+.auth-right-group {
+  width: 384px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: scale(var(--auth-right-scale, 1));
+  transform-origin: center center;
+}
+
+/* Welcome Header Group: Starts slightly above, fast then slows down */
+.auth-welcome-group {
+  position: relative;
+  width: 384px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 52px;
+  opacity: 0;
+  transform: translateY(-24px);
+  transition: transform 0.38s cubic-bezier(0.12, 0.95, 0.25, 1) 0s,
+              opacity 0.20s ease-out 0s;
+  pointer-events: none;
+}
+
+.auth-screen[data-mode="signin"] .auth-welcome-group {
+  margin-bottom: 64px;
+}
+
+.auth-screen[data-mode="signup"] .auth-welcome-group {
+  margin-bottom: 34px;
+}
+
+.auth-screen.is-open .auth-welcome-group {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.auth-welcome-text {
+  width: 100%;
+  text-align: center;
+  font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 57.2994px;
+  font-weight: 700;
+  color: #000000;
+  user-select: none;
+  line-height: 1;
+  margin-bottom: -10px;
+}
+
+.auth-welcome-bracket-svg {
+  width: 384px;
+  height: 40px;
+  overflow: visible;
+  display: block;
+}
+
+.auth-welcome-bracket {
+  fill: none;
+  stroke: #000000;
+  stroke-miterlimit: 10;
+  stroke-width: 5px;
+}
+
+/* Form containers */
+.auth-form-fields {
+  position: relative;
+  width: 384px;
+  margin: 0 auto;
+  padding: 0;
+  border: none;
+}
+
+.auth-screen[data-mode="signin"] .auth-form-signin {
+  display: block;
+}
+.auth-screen[data-mode="signin"] .auth-form-signup {
+  display: none;
+}
+
+.auth-screen[data-mode="signup"] .auth-form-signin {
+  display: none;
+}
+.auth-screen[data-mode="signup"] .auth-form-signup {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Entry Field Rows:
+   ANIMATION: Starts from the LEFT of their final position (-36px),
+   moving right and slowing down to the assigned position (0), under 0.6s total!
+   -------------------------------------------------------------------------- */
+.auth-field-row {
+  position: relative;
+  width: 306px;
+  height: 46px;
+  margin: 0 auto 22px auto;
+  cursor: text;
+  opacity: 0;
+  transform: translateX(-36px); /* Starts from the LEFT */
+  transition: transform 0.30s cubic-bezier(0.12, 0.95, 0.25, 1),
+              opacity 0.20s ease-out;
+  will-change: transform, opacity;
+}
+
+.auth-screen.is-open .auth-field-row {
+  opacity: 1;
+  transform: translateX(0); /* Slows down to assigned position */
+}
+
+/* Stagger delays under 0.6s total */
+.auth-screen.is-open .auth-field-row[style*="--field-idx: 1"] { transition-delay: 0.05s; }
+.auth-screen.is-open .auth-field-row[style*="--field-idx: 2"] { transition-delay: 0.09s; }
+.auth-screen.is-open .auth-field-row[style*="--field-idx: 3"] { transition-delay: 0.13s; }
+.auth-screen.is-open .auth-field-row[style*="--field-idx: 4"] { transition-delay: 0.17s; }
+.auth-screen.is-open .auth-field-row[style*="--field-idx: 5"] { transition-delay: 0.21s; }
+.auth-screen.is-open .auth-field-row[style*="--field-idx: 6"] { transition-delay: 0.24s; }
+.auth-screen.is-open .auth-field-row[style*="--field-idx: 7"] { transition-delay: 0.27s; }
+.auth-screen.is-open .auth-field-row[style*="--field-idx: 8"] { transition-delay: 0.29s; }
+
+/* Labels & Underlines */
+.auth-field-label {
+  position: absolute;
+  left: 0;
+  bottom: 8px;
+  font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #333333;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+
+.auth-field-row.is-focused .auth-field-label,
+.auth-field-row:focus-within:not(.has-value) .auth-field-label {
+  opacity: 0.35;
+  visibility: visible;
+}
+
+.auth-field-row.has-value .auth-field-label,
+.auth-field-row.is-focused.has-value .auth-field-label,
+.auth-field-row:focus-within.has-value .auth-field-label {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.auth-field-underline-svg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 306px;
+  height: 40px;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.auth-field-underline {
+  fill: none;
+  stroke: var(--auth-accent-color, #6a76ff);
+  stroke-width: 2px;
+  stroke-miterlimit: 10;
+  transition: stroke 0.3s ease, stroke-width 0.15s ease;
+}
+
+.auth-field-row.is-focused .auth-field-underline {
+  stroke-width: 2.5px;
+}
+
+/* --------------------------------------------------------------------------
+   Native HTML Inputs: Fully typable, pointer-events: auto, z-index: 5
+   -------------------------------------------------------------------------- */
+.auth-field-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 0 8px 0;
+  margin: 0;
+  font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #000000;
+  box-sizing: border-box;
+  z-index: 5;
+  cursor: text;
+  pointer-events: auto;
+}
+
+/* 'or' row: STATIC visual element, not a clickable button, does not do anything */
+.auth-field-row.auth-or-row {
+  width: 85px;
+  height: 32px;
+  margin: 0 auto 24px auto;
+  cursor: default;
+  pointer-events: none;
+}
+
+.auth-or-label {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  bottom: 5px;
+  text-align: center;
+  font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #333333;
+  pointer-events: none;
+  user-select: none;
+}
+
+.auth-or-underline-svg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 85px;
+  height: 28px;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Google Sign In / Sign Up row */
+.auth-field-row.auth-google-row {
+  cursor: pointer;
+}
+
+.auth-google-label {
+  position: absolute;
+  left: 0;
+  bottom: 8px;
+  font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #333333;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.auth-google-hitbox {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.auth-google-row:hover .auth-google-label {
+  color: #000000;
+}
+.auth-google-row:hover .auth-field-underline {
+  stroke-width: 2.5px;
+}
+
+/* Mode toggle link below */
+.auth-field-row.auth-toggle-row {
+  height: 28px;
+  margin: 6px auto 0 auto;
+  text-align: center;
+}
+
+.auth-mode-switch-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #777777;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color 0.15s ease;
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.auth-mode-switch-btn:hover {
+  color: #000000;
+}

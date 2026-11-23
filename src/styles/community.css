@@ -1,0 +1,431 @@
+/* ==========================================================================
+   NOPITAC - Community Page Stylesheet
+   Pixel-accurate translation from Illustrator artboards:
+     - community page no guides.svg
+     - community page_with guides.svg
+     - name box no guides.svg
+     - button__your board.svg
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Helvetica Neue Bold';
+  src: url('/fonts/HelveticaNeue-Bold.ttf') format('truetype'),
+       local('Helvetica Neue Bold'),
+       local('HelveticaNeue-Bold');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue Thin';
+  src: local('Helvetica Neue Thin'),
+       local('HelveticaNeue-Thin');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --bg-color: #ffffff;
+  --font-bold: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-regular: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-thin: 'Helvetica Neue Thin', 'HelveticaNeue-Thin', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  font-family: var(--font-regular);
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.community-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-color);
+}
+
+/* ==========================================================================
+   Fixed Top Header ("explore community")
+   Exact match to community page no guides.svg:
+   x = 510.43, y = 103.64, 48px bold, 3px outer bracket
+   ========================================================================== */
+.community-header {
+  position: absolute;
+  top: 70px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.community-header-bracket-wrap {
+  position: relative;
+  width: 472px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.community-title {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-bold);
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #000000;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  transform: translateY(-8px);
+}
+
+.community-header-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Scrolling Community User Rows
+   Occupies middle viewport from y = 187px to y = 800.82px
+   ========================================================================== */
+.community-scroll-container {
+  position: absolute;
+  top: 187px;
+  bottom: 100px; /* leaves room for the fixed bottom bar */
+  left: 0;
+  right: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 0 40px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.community-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.community-list {
+  width: calc(100vw - 165.568px);
+  margin-left: 82.784px;
+  margin-right: 82.784px;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* ==========================================================================
+   User Box Row
+   Horizontal stretch with constant 82.784px margin on both sides.
+   Outer bracket with 53.4334px wings on left and right, 1px bottom border.
+   ========================================================================== */
+.community-row-box {
+  position: relative;
+  width: 100%;
+  height: 106.8667px;
+  min-height: 106.8667px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #000000;
+  box-sizing: border-box;
+}
+
+.community-row-box::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 53.4334px;
+  background-color: #000000;
+  pointer-events: none;
+}
+
+.community-row-box::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  height: 53.4334px;
+  background-color: #000000;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Container 1: Icon and Name
+   Icon (circle / square / lines) + Nopitac Helvetica 36px name
+   Clickable -> routes to /board.html?user=<name>&mode=empty
+   -------------------------------------------------------------------------- */
+.community-col-user {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 355px;
+  height: 100%;
+  padding-left: 25px;
+  cursor: pointer;
+  z-index: 10;
+  transition: opacity 0.15s ease;
+}
+
+.community-col-user:hover {
+  opacity: 0.75;
+}
+
+.community-user-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 25px;
+}
+
+.community-user-icon svg {
+  display: block;
+  overflow: visible;
+}
+
+.community-username-wrap {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  overflow: visible;
+}
+
+.community-username-svg {
+  display: block;
+  overflow: visible;
+  height: 44px;
+}
+
+/* --------------------------------------------------------------------------
+   Container 2: Domains List
+   DomainType left-mode chips (28pt Helvetica Neue Regular, -25 tracking)
+   Separated by 16.92px gap (matching no-guides Illustrator spec)
+   -------------------------------------------------------------------------- */
+.community-col-domains {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  padding-left: 17px;
+  padding-right: 20px;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  z-index: 10;
+}
+
+.community-col-domains::-webkit-scrollbar {
+  display: none;
+}
+
+.community-domains-flex {
+  display: flex;
+  align-items: center;
+  gap: 16.92px;
+}
+
+.community-domain-chip {
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.community-domain-chip:hover {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.12));
+}
+
+.community-domain-chip svg {
+  display: block;
+  overflow: visible;
+}
+
+/* --------------------------------------------------------------------------
+   Container 3: Number of People
+   18pt Helvetica Neue Bold (-25 kerning)
+   Positioned near the bottom-right inside the bounding wing
+   -------------------------------------------------------------------------- */
+.community-col-count {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  width: 60px;
+  height: 100%;
+  padding-right: 18px;
+  padding-bottom: 8px;
+  z-index: 10;
+  cursor: default;
+}
+
+.community-count-text {
+  font-family: var(--font-bold);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #000000;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+.community-col-count:hover .community-count-text {
+  transform: scale(1.08);
+}
+
+/* ==========================================================================
+   Fixed Bottom Bar
+   Top line at y = 800.82px, pure white background (height ~99.18px)
+   Nopitac logo mark at bottom left, user signature at bottom right
+   Always on top of scrolling content (z-index: 100)
+   ========================================================================== */
+.community-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 99.1784px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px 0 28px;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.community-bottom-logo {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.community-bottom-logo svg {
+  height: 42px;
+  width: auto;
+  display: block;
+}
+
+.community-bottom-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+
+.community-user-by {
+  font-family: var(--font-thin);
+  font-size: 18px;
+  font-weight: 200;
+  color: #000000;
+  letter-spacing: -0.01em;
+}
+
+.community-user-name {
+  font-family: 'nopitac_helvetica', 'Nopitac Helvetica', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #000000;
+  letter-spacing: -0.025em;
+}
+
+/* ==========================================================================
+   Revolving "your board" Edge Button
+   Exact match to button__your board.svg:
+   width: 198.4px, height: 38.9px, stroke: 1.5px, Helvetica Neue Bold 24px
+   Bounded at y = 800.82px (never touches or crosses bottom edge)
+   ========================================================================== */
+.community-revolving-btn {
+  position: absolute;
+  z-index: 90;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  display: block;
+  background-color: #ffffff;
+  transition: filter 0.15s ease;
+}
+
+.community-revolving-btn:hover {
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.18));
+}
+
+.community-revolving-btn:active {
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.24));
+}
+
+.community-revolving-btn svg {
+  display: block;
+}
+
+/* ==========================================================================
+   Dwell Hover Tooltip
+   Fades in smoothly near cursor when hovering over domain chips or count
+   ========================================================================== */
+.community-tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+  padding: 4px 8px;
+  font-family: var(--font-regular);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  color: #000000;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10000;
+  opacity: 0;
+  transform: translate(12px, 16px);
+  transition: opacity 0.15s ease, transform 0.05s ease-out;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.community-tooltip.is-visible {
+  opacity: 1;
+}
+
+/* Ensure no selectable duplicate text renders underneath the Nopitac font */
+.nopitac-selectable-text {
+  display: none !important;
+  opacity: 0 !important;
+  fill: transparent !important;
+  pointer-events: none !important;
+}

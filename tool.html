@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOPITAC — Type Tool & Composition</title>
+  <meta name="description" content="NOPITAC — Names Of People I Think Are Cool. Custom Helvetica Signature Underline Type Tool & Square Spiral Composition.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/src/styles/index.css">
+  <link rel="stylesheet" href="/src/styles/canvas.css">
+  <link rel="stylesheet" href="/src/styles/composition.css">
+  <link rel="stylesheet" href="/src/styles/boardUi.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand-section">
+      <span class="brand-logo">
+        <span class="brand-logo-mark">
+          NOPITAC
+          <span class="brand-logo-bracket"></span>
+        </span>
+      </span>
+      <span class="brand-sub">Names Of People I Think Are Cool</span>
+
+      <!-- Primary Page Navigation Tabs -->
+      <nav class="nav-tabs" aria-label="Page Navigation">
+        <button class="nav-tab active" id="tabTypeTool" data-view="type-tool">Type Tool</button>
+        <button class="nav-tab" id="tabComposition" data-view="composition">Composition</button>
+        <button class="nav-tab" id="tabBoardUi" data-view="board-ui">Board UI</button>
+      </nav>
+    </div>
+
+    <div class="header-actions">
+      <a class="btn-action" id="downloadOtfBtn" href="/fonts/nopitac_helvetica.otf" download="nopitac_helvetica.otf" title="Download installable OpenType Font (.otf)">Download .OTF</a>
+      <button class="btn-action" id="copySvgBtn" title="Copy pure SVG vector to clipboard">Copy SVG</button>
+      <button class="btn-action btn-primary" id="exportSvgBtn" title="Download vector SVG file">Export SVG</button>
+    </div>
+  </header>
+
+  <!-- Main Views Container -->
+  <main class="app-main">
+    
+    <!-- View 1: Type Tool (Original Single / Multi-segment Interactive Tool) -->
+    <section class="page-view active" id="typeToolView">
+      <div class="stage-container">
+        
+        <!-- Primary Controls -->
+        <div class="controls-toolbar">
+          <!-- Text Input -->
+          <div class="input-bar">
+            <input 
+              type="text" 
+              id="nameInput" 
+              class="name-input" 
+              placeholder="type a name..." 
+              value="tiger dingsun" 
+              autofocus 
+              spellcheck="false" 
+              autocomplete="off"
+            >
+            <button class="input-clear-btn" id="clearInputBtn" title="Clear">&times;</button>
+          </div>
+
+          <!-- Parametric Controls: Kerning & Zoom -->
+          <div class="sliders-row">
+            <div class="slider-group">
+              <span class="slider-label">Kerning</span>
+              <input type="range" id="trackingSlider" min="-30" max="100" value="0" step="0.1" title="Adjust kerning / tracking spacing">
+              <span class="slider-val" id="trackingVal">0</span>
+            </div>
+
+            <div class="slider-group">
+              <span class="slider-label">Scale</span>
+              <input type="range" id="scaleSlider" min="1" max="3" value="1.8" step="0.1">
+              <span class="slider-val" id="scaleVal">1.8x</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="presets-row">
+          <span class="presets-hint">Try:</span>
+          <button class="preset-btn active" data-preset="tiger dingsun">tiger dingsun</button>
+          <button class="preset-btn" data-preset="saurabh malhotra">saurabh malhotra</button>
+          <button class="preset-btn" data-preset="nopitac">nopitac</button>
+          <button class="preset-btn" data-preset="virgil abloh">virgil abloh</button>
+          <button class="preset-btn" data-preset="dieter rams">dieter rams</button>
+          <button class="preset-btn" data-preset="paula scher">paula scher</button>
+        </div>
+
+        <!-- Main Typographic Stage -->
+        <div class="stage-viewport" id="stageViewport">
+          <div class="stage-wrapper" id="stageWrapper">
+            <div id="svgContainer" class="svg-render-container">
+              <!-- Rendered SVG injected here -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- View 2: Composition (Square Spiral with Continuous 90° Miter Underline) -->
+    <section class="page-view" id="compositionView">
+      <div class="composition-container">
+        
+        <!-- Composition Controls Toolbar -->
+        <div class="composition-toolbar">
+          
+          <!-- Designer Names Input Area -->
+          <div class="names-input-wrapper">
+            <div class="names-input-header">
+              <span class="names-input-label">Designers / Names List</span>
+              <span class="names-count-badge" id="compNamesCount">30 designers</span>
+            </div>
+            <textarea 
+              id="compNamesInput" 
+              class="names-textarea" 
+              placeholder="Enter designer names separated by commas or lines..." 
+              spellcheck="false"
+            ></textarea>
+          </div>
+
+          <!-- Composition Presets Row -->
+          <div class="comp-presets-row">
+            <button class="comp-preset-btn active" data-comp-preset="iconic">Iconic Designers (Reference)</button>
+            <button class="comp-preset-btn" data-comp-preset="modernist">Modernist Pioneers</button>
+            <button class="comp-preset-btn" data-comp-preset="contemporary">Contemporary & Digital</button>
+            <div class="comp-presets-divider"></div>
+            <button class="comp-animate-btn" id="compApproach1Btn" title="Approach 1: Continuous snake turn around corners">
+              <span class="animate-icon" id="compApproach1Icon">▶</span>
+              <span class="animate-label" id="compApproach1Label">Approach 1</span>
+            </button>
+            <button class="comp-animate-btn" id="compApproach2Btn" title="Approach 2: Instant edge jump when reaching corners">
+              <span class="animate-icon" id="compApproach2Icon">▶</span>
+              <span class="animate-label" id="compApproach2Label">Approach 2</span>
+            </button>
+            <button class="comp-animate-btn" id="compRotateBtn" title="Start / pause whole composition rotation from center">
+              <span class="animate-icon" id="compRotateIcon">↻</span>
+              <span class="animate-label" id="compRotateLabel">Rotate</span>
+            </button>
+          </div>
+
+          <!-- Parameter Controls Grid -->
+          <div class="comp-controls-grid">
+            
+            <!-- Ring Spacing Slider -->
+            <div class="comp-control-item">
+              <span class="comp-control-label">Spacing</span>
+              <input type="range" id="compSpacingSlider" min="45" max="110" value="68" step="1" title="Adjust distance between concentric spiral loops">
+              <span class="comp-control-val" id="compSpacingVal">68px</span>
+            </div>
+
+            <!-- Font Scale Slider -->
+            <div class="comp-control-item">
+              <span class="comp-control-label">Scale</span>
+              <input type="range" id="compScaleSlider" min="0.4" max="1.1" value="0.65" step="0.01" title="Adjust text font size along spiral">
+              <span class="comp-control-val" id="compScaleVal">0.65x</span>
+            </div>
+
+            <!-- Kerning Slider -->
+            <div class="comp-control-item">
+              <span class="comp-control-label">Kerning</span>
+              <input type="range" id="compTrackingSlider" min="-15" max="30" value="0" step="0.5" title="Fine-tune character letterspacing">
+              <span class="comp-control-val" id="compTrackingVal">0</span>
+            </div>
+
+            <!-- Animation Speed Slider -->
+            <div class="comp-control-item">
+              <span class="comp-control-label">Speed</span>
+              <input type="range" id="compSpeedSlider" min="0.2" max="3.0" value="1.0" step="0.1" title="Adjust animation playback speed">
+              <span class="comp-control-val" id="compSpeedVal">1.0x</span>
+            </div>
+
+            <!-- Shape Segmented Toggle (Square vs Circle) -->
+            <div class="comp-control-item" style="grid-column: span 1;">
+              <div class="segmented-control" id="compShapeToggle">
+                <button class="segmented-btn active" data-shape="square" title="Concentric squares composition with whole names along edges">Squares</button>
+                <button class="segmented-btn" data-shape="circle" title="Concentric spiraling circles composition">Circles</button>
+              </div>
+            </div>
+
+            <!-- Underline Style Segmented Toggle -->
+            <div class="comp-control-item" style="grid-column: span 1;">
+              <div class="segmented-control" id="compStyleToggle">
+                <button class="segmented-btn active" data-style="name-brackets" title="Each designer has front drop stem and back rise stem with straight underline">Name Brackets</button>
+                <button class="segmented-btn" data-style="continuous-ribbon" title="Single unbroken closed geometric tracks through entire composition">Continuous Frames</button>
+                <button class="segmented-btn" data-style="clean-underlines" title="Clean Helvetica letters on continuous geometric underline tracks">Clean Helvetica</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Composition Stage Viewport -->
+        <div class="comp-stage-viewport" id="compStageViewport">
+          <div class="comp-stage-wrapper" id="compStageWrapper">
+            <div id="compSvgContainer" class="comp-svg-container">
+              <!-- Rendered Composition SVG injected here -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- View 3: Board UI (Pure Board with Add Person button attached to top edge) -->
+    <section class="page-view" id="boardUiView">
+      <div class="board-ui-viewport" id="tabBoardViewport">
+        <!-- Add Person Button mounted here -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Minimal Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

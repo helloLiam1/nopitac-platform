@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" width="31.9243" height="45.7493" viewBox="0 0 31.9243 45.7493">
+  <rect x="22.3097" y="35.3082" width="3.9082" height="7.2551"/>
+  <rect x="6.2311" y="38.7196" width="17.7673" height="3.8437"/>
+  <line x1="-.7198" y1="33.4946" x2="32.908" y2="33.4946" style="fill: none; stroke: #231f20; stroke-miterlimit: 10; stroke-width: .25px;"/>
+  <path d="M22.3099,2.072h3.9077v4.3564h-3.9077V2.072ZM22.3099,10.6775h3.9077v22.7637h-3.9077V10.6775Z"/>
+</svg>

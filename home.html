@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOPITAC — Names Of People I Think Are Cool</title>
+  <meta name="description" content="A place for creatives to store names of all the people who inspire you.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/src/styles/homeEntry.css">
+  <script>
+    // If user is already logged in, immediately redirect to board with zero flash
+    try {
+      if (localStorage.getItem('nopitac_user')) {
+        window.location.replace('/board.html');
+      }
+    } catch (e) {}
+  </script>
+</head>
+<body class="home-body">
+
+  <!-- Main Scaled Viewport Container (1440x900) -->
+  <div class="home-viewport" id="homeViewport">
+
+    <!-- Lottie Vector SVG Animation Layer (Plays Bodymovin After Effects animation) -->
+    <div id="lottieContainer" class="home-lottie-container"></div>
+
+    <!-- Interactive Vector SVG Overlay (Coordinates match 1440x900 After Effects stage) -->
+    <svg class="home-overlay-svg" viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      
+      <!-- Click & Scroll Hot-Zone for Central Definition Box -->
+      <rect id="boxHitArea" class="box-hit-area" x="487.2978" y="150.0158" width="459.5097" height="560.807" fill="transparent" pointer-events="all" />
+
+      <!-- Interactive Sign Up Button (Exact geometry from button_sign up.svg, pushed above) -->
+      <g transform="translate(608.0613 724.035)">
+        <g id="homeSignUpBtn" class="home-btn-group" role="button" tabindex="0" aria-label="Sign Up" pointer-events="all">
+          <rect class="home-btn-hitbox" x="0" y="0" width="207.771" height="38.4513" fill="transparent" />
+          <polyline class="home-btn-bracket" points="1 14.0026 1 37.4513 206.771 37.4513 206.771 14.0026" />
+          <text class="home-btn-text" transform="translate(57.8384 23.9964)" style="font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.032em;"><tspan x="0" y="0">sign up</tspan></text>
+        </g>
+      </g>
+
+      <!-- Interactive Sign In Button (Exact geometry from button_sign in.svg, pushed above) -->
+      <g transform="translate(609.0651 785.075)">
+        <g id="homeSignInBtn" class="home-btn-group" role="button" tabindex="0" aria-label="Sign In" pointer-events="all">
+          <rect class="home-btn-hitbox" x="0" y="0" width="204.9919" height="38.451" fill="transparent" />
+          <polyline class="home-btn-bracket" points="1 14.0023 1 37.451 203.9919 37.451 203.9919 14.0023" />
+          <text class="home-btn-text" transform="translate(61.7758 23.9961)" style="font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.032em;"><tspan x="0" y="0">sign in</tspan></text>
+        </g>
+      </g>
+
+    </svg>
+
+  </div>
+
+  <!-- Full-Screen Split Auth Screen (Sign In / Sign Up) -->
+  <div id="authScreen" class="auth-screen" data-mode="signin" aria-hidden="true">
+    
+    <!-- Left Half (50% width, full height) with equal whitespace on all sides -->
+    <div class="auth-half auth-half-left">
+      <div class="auth-poster-box">
+        <div class="auth-poster-rect">
+          <div class="auth-poster-borders"></div>
+          <div class="auth-poster-text">
+            <span>you’re</span>
+            <span>quite</span>
+            <span>cool!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Half (50% width, full height) - grouped & centered -->
+    <div class="auth-half auth-half-right">
+      <div class="auth-right-group">
+        <!-- Welcome Header (Animates down from above, decelerating) -->
+        <div class="auth-welcome-group" id="authWelcomeGroup">
+          <div class="auth-welcome-text">welcome</div>
+          <svg class="auth-welcome-bracket-svg" viewBox="0 0 384 40" preserveAspectRatio="none">
+            <polyline points="381 2 381 37 3 37 3 2" class="auth-welcome-bracket" />
+          </svg>
+        </div>
+
+        <!-- Sign In Form (Fields animate in from the left, decelerating, under 0.6s) -->
+        <form id="signInForm" class="auth-form-fields auth-form-signin" autocomplete="on">
+          <!-- 1. username/email -->
+          <div class="auth-field-row" data-field="signin-username" style="--field-idx: 1;">
+            <label for="signInUsername" class="auth-field-label">username/email</label>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <input type="text" id="signInUsername" class="auth-field-input" autocomplete="username" spellcheck="false" />
+          </div>
+
+          <!-- 2. password -->
+          <div class="auth-field-row" data-field="signin-password" style="--field-idx: 2;">
+            <label for="signInPassword" class="auth-field-label">password</label>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <input type="password" id="signInPassword" class="auth-field-input" autocomplete="current-password" />
+          </div>
+
+          <!-- 3. or (STATIC, NOT CLICKABLE) -->
+          <div class="auth-field-row auth-or-row" style="--field-idx: 3;">
+            <span class="auth-or-label">or</span>
+            <svg class="auth-or-underline-svg" viewBox="0 0 85 28" preserveAspectRatio="none">
+              <polyline points="84 0 84 26 1 26 1 0" class="auth-field-underline" />
+            </svg>
+          </div>
+
+          <!-- 4. sign-in with google -->
+          <div class="auth-field-row auth-google-row" style="--field-idx: 4;">
+            <span class="auth-google-label">sign-in with google</span>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <button type="button" id="signInGoogleBtn" class="auth-google-hitbox" aria-label="Sign in with Google"></button>
+          </div>
+
+          <!-- Mode switch link below -->
+          <div class="auth-field-row auth-toggle-row" style="--field-idx: 5;">
+            <button type="button" class="auth-mode-switch-btn" id="signInToSignUpBtn">don’t have an account? sign up</button>
+          </div>
+
+          <button type="submit" style="display: none;"></button>
+        </form>
+
+        <!-- Sign Up Form (Fields animate in from the left, decelerating, under 0.6s) -->
+        <form id="signUpForm" class="auth-form-fields auth-form-signup" autocomplete="on">
+          <!-- 1. your name -->
+          <div class="auth-field-row" data-field="signup-name" style="--field-idx: 1;">
+            <label for="signUpName" class="auth-field-label">your name</label>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <input type="text" id="signUpName" class="auth-field-input" autocomplete="name" spellcheck="false" />
+          </div>
+
+          <!-- 2. username -->
+          <div class="auth-field-row" data-field="signup-username" style="--field-idx: 2;">
+            <label for="signUpUsername" class="auth-field-label">username</label>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <input type="text" id="signUpUsername" class="auth-field-input" autocomplete="username" spellcheck="false" />
+          </div>
+
+          <!-- 3. email -->
+          <div class="auth-field-row" data-field="signup-email" style="--field-idx: 3;">
+            <label for="signUpEmail" class="auth-field-label">email</label>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <input type="email" id="signUpEmail" class="auth-field-input" autocomplete="email" spellcheck="false" />
+          </div>
+
+          <!-- 4. password -->
+          <div class="auth-field-row" data-field="signup-password" style="--field-idx: 4;">
+            <label for="signUpPassword" class="auth-field-label">password</label>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <input type="password" id="signUpPassword" class="auth-field-input" autocomplete="new-password" />
+          </div>
+
+          <!-- 5. re-password -->
+          <div class="auth-field-row" data-field="signup-repassword" style="--field-idx: 5;">
+            <label for="signUpRePassword" class="auth-field-label">re-password</label>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <input type="password" id="signUpRePassword" class="auth-field-input" autocomplete="new-password" />
+          </div>
+
+          <!-- 6. or (STATIC, NOT CLICKABLE) -->
+          <div class="auth-field-row auth-or-row" style="--field-idx: 6;">
+            <span class="auth-or-label">or</span>
+            <svg class="auth-or-underline-svg" viewBox="0 0 85 28" preserveAspectRatio="none">
+              <polyline points="84 0 84 26 1 26 1 0" class="auth-field-underline" />
+            </svg>
+          </div>
+
+          <!-- 7. sign-up with google -->
+          <div class="auth-field-row auth-google-row" style="--field-idx: 7;">
+            <span class="auth-google-label">sign-up with google</span>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <button type="button" id="signUpGoogleBtn" class="auth-google-hitbox" aria-label="Sign up with Google"></button>
+          </div>
+
+          <!-- Mode switch link below -->
+          <div class="auth-field-row auth-toggle-row" style="--field-idx: 8;">
+            <button type="button" class="auth-mode-switch-btn" id="signUpToSignInBtn">already have an account? sign in</button>
+          </div>
+
+          <button type="submit" style="display: none;"></button>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module" src="/src/homeApp.js"></script>
+</body>
+</html>

@@ -1,0 +1,2047 @@
+/* Nopitac Board UI & Edge Buttons Styles */
+
+@font-face {
+  font-family: 'Nopitac Helvetica';
+  src: url('/fonts/nopitac_helvetica.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'nopitac_helvetica';
+  src: url('/fonts/nopitac_helvetica.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue Bold';
+  src: url('/fonts/HelveticaNeue-Bold.ttf') format('truetype'),
+       local('Helvetica Neue Bold'),
+       local('HelveticaNeue-Bold');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-nopitac-bold: "Helvetica Neue Bold", "HelveticaNeue-Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-nopitac-regular: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-nopitac-light: "HelveticaNeue-Light", "Helvetica Neue Light", "HelveticaNeue-Thin", "Helvetica Neue Thin", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-nopitac-custom: 'Nopitac Helvetica', 'nopitac_helvetica', Helvetica, Arial, sans-serif;
+}
+
+html,
+body.board-ui-body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background-color: #ffffff;
+  transition: background-color 0.35s ease;
+  font-family: var(--font-nopitac-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Board UI Container */
+.board-ui-viewport {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background-color: #ffffff;
+  transition: background-color 0.35s ease;
+}
+
+/* ============================================================
+   ADD PERSON BUTTON & EXPANDED PANEL
+   Attached dynamically to:
+     - Top Edge:   146.12 × 29.95 px (closed) -> 181.66 × 500.66 px (expanded)
+     - Left Edge:   29.95 × 146.12 px (closed) -> 575.99 × 157.25 px (expanded)
+     - Right Edge:  29.95 × 146.12 px (closed) -> 579.87 × 157.25 px (expanded)
+============================================================ */
+.add-person-widget {
+  position: absolute;
+  background: transparent;
+  z-index: 1000;
+  box-sizing: border-box;
+  user-select: none;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.add-person-widget.is-expanded {
+  background: #ffffff;
+}
+
+/* ------------------------------------------------------------
+   TOP EDGE
+------------------------------------------------------------ */
+.add-person-widget.is-edge-top {
+  top: 0 !important;
+  bottom: auto !important;
+  width: 146.12px;
+  height: 29.95px;
+  transform: none;
+  transform-origin: top left;
+  /* Collapsing: height collapses first (280ms), then width contracts (180ms) */
+  transition:
+    height 0.280s cubic-bezier(0.3, 0, 0.2, 1) 0s,
+    width 0.180s cubic-bezier(0.3, 0, 0.2, 1) 0.100s;
+}
+
+.add-person-widget.is-edge-top.is-expanded {
+  top: 0 !important;
+  bottom: auto !important;
+  width: 181.66px;
+  height: 491.35px;
+  transform: none;
+  cursor: default;
+  /* Expanding: Continuous, ultra-smooth unroll matching AE speed graph (<=750ms total) */
+  transition:
+    width 0.167s cubic-bezier(0.25, 0.1, 0.25, 1) 0s,
+    height 0.417s cubic-bezier(0.3, 0.2, 0.1, 1) 0s;
+}
+
+/* ------------------------------------------------------------
+   LEFT EDGE
+   Bottom line (closest to heading) is firmly anchored at resting y:
+   - Height expands by 11.1242px (146.12px -> 157.25px)
+   - Synchronous translateY(-11.1242px) moves top upwards
+   - Net bottom visual movement is exactly 0.000px!
+------------------------------------------------------------ */
+.add-person-widget.is-edge-left {
+  left: 0 !important;
+  right: auto !important;
+  width: 29.95px;
+  height: 146.12px;
+  transform: translateY(0);
+  transform-origin: bottom left;
+  /* Collapsing: width collapses first (280ms), then height and transform contract together (180ms) */
+  transition:
+    width 0.280s cubic-bezier(0.3, 0, 0.2, 1) 0s,
+    transform 0.180s cubic-bezier(0.3, 0, 0.2, 1) 0.100s,
+    height 0.180s cubic-bezier(0.3, 0, 0.2, 1) 0.100s;
+}
+
+.add-person-widget.is-edge-left.is-expanded {
+  left: 0 !important;
+  right: auto !important;
+  width: 575.99px;
+  height: 157.25px;
+  transform: translateY(-11.1242px);
+  cursor: default;
+  /* Expanding: Bottom anchored firmly, line extends right and unrolls in place */
+  transition:
+    transform 0.167s cubic-bezier(0.25, 0.1, 0.25, 1) 0s,
+    height 0.167s cubic-bezier(0.25, 0.1, 0.25, 1) 0s,
+    width 0.417s cubic-bezier(0.3, 0.2, 0.1, 1) 0s;
+}
+
+/* ------------------------------------------------------------
+   RIGHT EDGE
+------------------------------------------------------------ */
+.add-person-widget.is-edge-right {
+  right: 0 !important;
+  left: auto !important;
+  width: 29.95px;
+  height: 146.12px;
+  transform: none;
+  transform-origin: top right;
+  /* Collapsing: width collapses first (280ms), then height contracts (180ms) */
+  transition:
+    width 0.280s cubic-bezier(0.3, 0, 0.2, 1) 0s,
+    height 0.180s cubic-bezier(0.3, 0, 0.2, 1) 0.100s;
+}
+
+.add-person-widget.is-edge-right.is-expanded {
+  right: 0 !important;
+  left: auto !important;
+  width: 579.87px;
+  height: 157.25px;
+  transform: none;
+  cursor: default;
+  /* Expanding: Continuous, ultra-smooth unroll to the left (<=750ms total) */
+  transition:
+    height 0.167s cubic-bezier(0.25, 0.1, 0.25, 1) 0s,
+    width 0.417s cubic-bezier(0.3, 0.2, 0.1, 1) 0s;
+}
+
+.add-person-widget.no-transition,
+.add-person-widget.no-transition * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ============================================================
+   OUTER BORDER SVG & VECTOR POLYLINES
+============================================================ */
+.add-person-outer-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 10;
+}
+
+.add-person-border-line {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 1.5px;
+  stroke-miterlimit: 10;
+  stroke-linecap: square;
+}
+
+/* Clickable Header Area */
+.add-person-header {
+  position: absolute;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.is-edge-top .add-person-header {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 29.95px;
+}
+
+.is-edge-left .add-person-header {
+  top: 0;
+  left: 0;
+  width: 29.95px;
+  height: 100%;
+}
+
+.is-edge-right .add-person-header {
+  top: 0;
+  right: 0;
+  left: auto;
+  width: 29.95px;
+  height: 100%;
+}
+
+/* ============================================================
+   EXPANDABLE FORM CONTENT
+============================================================ */
+.add-person-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.10s ease 0s;
+  z-index: 15;
+}
+
+.add-person-widget.is-expanded .add-person-content {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.12s ease 0.08s;
+}
+
+/* Inner Vector Graphics Layer */
+.add-person-inner-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.inner-bracket {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 1px;
+  stroke-miterlimit: 10;
+}
+
+.inner-divider-thin {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 0.25px;
+  stroke-miterlimit: 10;
+}
+
+.photo-box-outline {
+  fill: none;
+  stroke: #b3b3b3;
+  stroke-width: 0.5px;
+  stroke-miterlimit: 10;
+}
+
+.photo-plus-icon {
+  fill: #b3b3b3;
+  transition: opacity 0.15s ease;
+}
+
+.svg-field-label {
+  fill: #333333;
+  font-family: var(--font-nopitac-regular);
+  font-size: 16px;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.15s ease;
+}
+
+.svg-field-label.is-bold {
+  font-family: var(--font-nopitac-bold);
+  font-weight: 700;
+}
+
+#svgLabelDone,
+.svg-field-label.is-done-label {
+  fill: #000000;
+  transition: fill 0.15s ease;
+}
+
+/* ============================================================
+   STAGGERED 8-LAYER SLIDE ANIMATION (AE Graph Replica)
+   - Top edge: slides down from above (translateY(-8px) -> 0)
+   - Left edge: slides in from a little to the left (translateX(-12px) -> 0)
+   - Right edge: slides in from a little to the right (translateX(12px) -> 0)
+============================================================ */
+
+/* Top edge: slides down from above */
+.is-edge-top .add-person-layer {
+  transform: translateY(-8px);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center top;
+  transition:
+    transform 0.083s ease-in,
+    opacity 0.083s ease-in;
+}
+
+.is-edge-top.is-expanded .add-person-layer {
+  transform: translateY(0);
+  opacity: 1;
+  transition:
+    transform 0.083s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.083s ease-out;
+}
+
+/* Left edge: slides in from a little to the left */
+.is-edge-left .add-person-layer {
+  transform: translateX(-12px);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition:
+    transform 0.083s ease-in,
+    opacity 0.083s ease-in;
+}
+
+.is-edge-left.is-expanded .add-person-layer {
+  transform: translateX(0);
+  opacity: 1;
+  transition:
+    transform 0.083s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.083s ease-out;
+}
+
+/* Right edge: slides in from a little to the right */
+.is-edge-right .add-person-layer {
+  transform: translateX(12px);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: right center;
+  transition:
+    transform 0.083s ease-in,
+    opacity 0.083s ease-in;
+}
+
+.is-edge-right.is-expanded .add-person-layer {
+  transform: translateX(0);
+  opacity: 1;
+  transition:
+    transform 0.083s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.083s ease-out;
+}
+
+/* 8 Staggered delays matching After Effects timeline (04f through 18f, completing at 750ms) */
+.add-person-widget.is-expanded .layer-stagger-1 { transition-delay: 0.167s; }
+.add-person-widget.is-expanded .layer-stagger-2 { transition-delay: 0.208s; }
+.add-person-widget.is-expanded .layer-stagger-3 { transition-delay: 0.292s; }
+.add-person-widget.is-expanded .layer-stagger-4 { transition-delay: 0.333s; }
+.add-person-widget.is-expanded .layer-stagger-5 { transition-delay: 0.417s; }
+.add-person-widget.is-expanded .layer-stagger-6 { transition-delay: 0.458s; }
+.add-person-widget.is-expanded .layer-stagger-7 { transition-delay: 0.542s; }
+.add-person-widget.is-expanded .layer-stagger-8 { transition-delay: 0.667s; }
+
+/* Immediate hide when contracting */
+.add-person-widget:not(.is-expanded) .add-person-layer {
+  transition-delay: 0s !important;
+}
+
+/* ============================================================
+   INTERACTIVE FORM INPUTS OVERLAY
+============================================================ */
+.field-input-box {
+  position: absolute;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0 4px;
+  margin: 0;
+  font-family: var(--font-nopitac-regular);
+  font-size: 15px;
+  color: #000000;
+  box-sizing: border-box;
+  caret-color: #000000;
+  z-index: 25;
+}
+
+.field-input-box:focus {
+  outline: none;
+}
+
+/* --- TOP EDGE INPUTS --- */
+.top-input-name {
+  left: 16px;
+  top: 40px;
+  width: 150px;
+  height: 21px;
+  line-height: 21px;
+  font-family: var(--font-nopitac-bold);
+  font-weight: 700;
+  text-align: center;
+}
+
+.top-input-domain {
+  left: 16px;
+  top: 73px;
+  width: 150px;
+  height: 21px;
+  line-height: 21px;
+  font-family: var(--font-nopitac-bold);
+  font-weight: 700;
+  text-align: center;
+}
+
+.top-input-year {
+  left: 16px;
+  top: 107px;
+  width: 150px;
+  height: 21px;
+  line-height: 21px;
+  text-align: center;
+}
+
+.top-input-why {
+  left: 16px;
+  top: 176px;
+  width: 150px;
+  height: 90px;
+  line-height: 18px;
+  resize: none;
+  overflow: hidden;
+  text-align: center;
+}
+
+.top-input-place {
+  left: 16px;
+  top: 279px;
+  width: 150px;
+  height: 21px;
+  line-height: 21px;
+  text-align: center;
+}
+
+.top-input-links {
+  left: 16px;
+  top: 331px;
+  width: 150px;
+  height: 24px;
+  line-height: 18px;
+  resize: none;
+  overflow: hidden;
+  word-break: break-all;
+  text-align: center;
+}
+
+.top-photos {
+  left: 70.32px;
+  top: 392.33px;
+  width: 41.23px;
+  height: 41.23px;
+}
+
+.top-done-btn {
+  left: 15px;
+  top: 455px;
+  width: 151px;
+  height: 22px;
+}
+
+/* --- LEFT EDGE INPUTS --- */
+.left-input-name {
+  left: 42px;
+  top: 14px;
+  width: 151px;
+  height: 21.5px;
+  line-height: 21.5px;
+  font-family: var(--font-nopitac-bold);
+  font-weight: 700;
+}
+
+.left-input-domain {
+  left: 42px;
+  top: 50px;
+  width: 151px;
+  height: 21.5px;
+  line-height: 21.5px;
+  font-family: var(--font-nopitac-bold);
+  font-weight: 700;
+}
+
+.left-input-year {
+  left: 42px;
+  top: 86.5px;
+  width: 151px;
+  height: 21.5px;
+  line-height: 21.5px;
+}
+
+.left-input-place {
+  left: 42px;
+  top: 121px;
+  width: 151px;
+  height: 21.5px;
+  line-height: 21.5px;
+}
+
+.left-input-why {
+  left: 208px;
+  top: 44px;
+  width: 151px;
+  height: 98px;
+  line-height: 18px;
+  resize: none;
+  overflow: hidden;
+}
+
+.left-input-links {
+  left: 375px;
+  top: 29px;
+  width: 151px;
+  height: 27px;
+  line-height: 18px;
+  resize: none;
+  overflow: hidden;
+  word-break: break-all;
+}
+
+.left-photos {
+  left: 375.15px;
+  top: 92.16px;
+  width: 41.23px;
+  height: 41.23px;
+}
+
+.left-done-btn {
+  left: 541px;
+  top: 14px;
+  width: 22px;
+  height: 129px;
+}
+
+/* --- RIGHT EDGE INPUTS --- */
+.right-input-name {
+  left: 14px;
+  top: 14px;
+  width: 151px;
+  height: 21.5px;
+  line-height: 21.5px;
+  font-family: var(--font-nopitac-bold);
+  font-weight: 700;
+}
+
+.right-input-domain {
+  left: 14px;
+  top: 50px;
+  width: 151px;
+  height: 21.5px;
+  line-height: 21.5px;
+  font-family: var(--font-nopitac-bold);
+  font-weight: 700;
+}
+
+.right-input-year {
+  left: 14px;
+  top: 86.5px;
+  width: 151px;
+  height: 21.5px;
+  line-height: 21.5px;
+}
+
+.right-input-place {
+  left: 14px;
+  top: 121px;
+  width: 151px;
+  height: 21.5px;
+  line-height: 21.5px;
+}
+
+.right-input-why {
+  left: 180px;
+  top: 50px;
+  width: 151px;
+  height: 92px;
+  line-height: 18px;
+  resize: none;
+  overflow: hidden;
+}
+
+.right-input-links {
+  left: 347px;
+  top: 31px;
+  width: 151px;
+  height: 25px;
+  line-height: 18px;
+  resize: none;
+  overflow: hidden;
+  word-break: break-all;
+}
+
+.right-photos {
+  left: 457.23px;
+  top: 92.16px;
+  width: 41.23px;
+  height: 41.23px;
+}
+
+.right-done-btn {
+  left: 513px;
+  top: 14px;
+  width: 22px;
+  height: 129px;
+}
+
+/* ============================================================
+   PHOTOS UPLOAD SLOTS & DONE ACTIONS
+============================================================ */
+.photos-container {
+  position: absolute;
+  display: flex;
+  gap: 9.05px;
+  z-index: 25;
+}
+
+.photo-slot {
+  position: relative;
+  width: 41.23px;
+  height: 41.23px;
+}
+
+.photo-preview-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 41.23px;
+  height: 41.23px;
+  object-fit: cover;
+  border: 0.5px solid #b3b3b3;
+  pointer-events: none;
+  z-index: 2;
+  box-sizing: border-box;
+  display: none;
+}
+
+.photo-file-input {
+  display: none;
+}
+
+.photo-slot-btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 41.23px;
+  height: 41.23px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  z-index: 3;
+  transition: background-color 0.15s ease;
+}
+
+.photo-slot-btn:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.done-action-btn {
+  position: absolute;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  z-index: 30;
+  transition: opacity 0.15s ease;
+}
+
+.done-action-btn:hover {
+  opacity: 0.7;
+}
+
+.done-action-btn:hover ~ .add-person-inner-svg #svgLabelDone,
+.add-person-widget:has(.done-action-btn:hover) #svgLabelDone {
+  fill: #000000;
+}
+
+/* ============================================================
+   BOARD LOGO & USER BADGE FOOTER
+   - Logo at bottom-left: aligned to x = 27.99px, bottom = 28.77px (top = usableHeight)
+   - User badge at bottom-right: container right-aligned to right guideline (right = 28px)
+   - "by" left-aligned with username; username rendered in nopitac_helvetica
+============================================================ */
+.board-logo {
+  position: absolute;
+  left: 27.99px;
+  bottom: 28.77px;
+  width: 131.52px;
+  height: 49.88px;
+  user-select: none;
+  pointer-events: none;
+  z-index: 60;
+}
+
+.board-logo-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.board-user-badge {
+  position: absolute;
+  right: 28px;
+  bottom: 28.77px;
+  user-select: none;
+  z-index: 60;
+  pointer-events: auto;
+}
+
+.board-user-by {
+  position: absolute;
+  left: 0;
+  bottom: 20px;
+  font-family: var(--font-nopitac-light);
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 20px;
+  color: #000000;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.board-user-name {
+  display: block;
+  font-family: var(--font-nopitac-custom);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #000000;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.board-moving-btn {
+  position: absolute;
+  user-select: none;
+  cursor: pointer;
+  z-index: 90;
+  background: transparent;
+  display: block;
+  box-sizing: border-box;
+  transition: opacity 0.15s ease;
+}
+
+.board-moving-btn:hover {
+  opacity: 0.85;
+}
+
+.board-moving-btn.is-left {
+  left: 0;
+  right: auto;
+}
+
+.board-moving-btn.is-top {
+  top: 0;
+  bottom: auto;
+}
+
+.board-moving-btn.is-right {
+  right: 0;
+  left: auto;
+}
+
+.board-btn-svg {
+  display: block;
+}
+
+/* ============================================================
+   SORT BUTTON & EXPANDED PANEL
+   Attached dynamically to:
+     - Top Edge:    79.40 × 29.46 px (closed) -> 134.10 × 282.46 px (expanded)
+     - Left Edge:   29.46 × 79.40 px (closed) -> 355.98 × 114.40 px (expanded)
+     - Right Edge:  29.46 × 79.40 px (closed) -> 355.98 × 114.40 px (expanded)
+============================================================ */
+.sort-widget {
+  position: absolute;
+  background: transparent;
+  z-index: 1000;
+  box-sizing: border-box;
+  user-select: none;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.sort-widget.is-expanded {
+  background: #ffffff;
+}
+
+/* ------------------------------------------------------------
+   TOP EDGE
+------------------------------------------------------------ */
+.sort-widget.is-edge-top {
+  top: 0 !important;
+  bottom: auto !important;
+  width: 79.40px;
+  height: 29.46px;
+  transform: none;
+  transform-origin: top left;
+  /* Collapsing: height collapses first (280ms), then width contracts (180ms) */
+  transition:
+    height 0.280s cubic-bezier(0.3, 0, 0.2, 1) 0s,
+    width 0.180s cubic-bezier(0.3, 0, 0.2, 1) 0.100s;
+}
+
+.sort-widget.is-edge-top.is-expanded {
+  top: 0 !important;
+  bottom: auto !important;
+  width: 134.10px;
+  height: 293.41px;
+  transform: none;
+  cursor: default;
+  /* Expanding: Continuous, ultra-smooth unroll matching AE speed graph (<=750ms total) */
+  transition:
+    width 0.167s cubic-bezier(0.25, 0.1, 0.25, 1) 0s,
+    height 0.417s cubic-bezier(0.3, 0.2, 0.1, 1) 0s;
+}
+
+/* ------------------------------------------------------------
+   LEFT EDGE
+   Bottom line (closest to heading) is firmly anchored at resting y:
+   - Anchored via CSS layout 'bottom' constraint (top: auto, transform: none)
+   - Height expands upwards by 34.9973px (79.40px -> 114.40px)
+   - Eliminates GPU/layout desync: net bottom visual movement is exactly 0.000px!
+------------------------------------------------------------ */
+.sort-widget.is-edge-left {
+  left: 0 !important;
+  right: auto !important;
+  top: auto !important;
+  width: 29.46px;
+  height: 79.40px;
+  transform: none !important;
+  transform-origin: bottom left;
+  /* Collapsing: width collapses first (280ms), then height contracts (180ms) */
+  transition:
+    width 0.280s cubic-bezier(0.3, 0, 0.2, 1) 0s,
+    height 0.180s cubic-bezier(0.3, 0, 0.2, 1) 0.100s;
+}
+
+.sort-widget.is-edge-left.is-expanded {
+  left: 0 !important;
+  right: auto !important;
+  top: auto !important;
+  width: 355.98px;
+  height: 114.40px;
+  transform: none !important;
+  cursor: default;
+  /* Expanding: Bottom anchored firmly, line extends right and unrolls in place */
+  transition:
+    height 0.167s cubic-bezier(0.25, 0.1, 0.25, 1) 0s,
+    width 0.417s cubic-bezier(0.3, 0.2, 0.1, 1) 0s;
+}
+
+/* ------------------------------------------------------------
+   RIGHT EDGE
+------------------------------------------------------------ */
+.sort-widget.is-edge-right {
+  right: 0 !important;
+  left: auto !important;
+  width: 29.46px;
+  height: 79.40px;
+  transform: none;
+  transform-origin: top right;
+  /* Collapsing: width collapses first (280ms), then height contracts (180ms) */
+  transition:
+    width 0.280s cubic-bezier(0.3, 0, 0.2, 1) 0s,
+    height 0.180s cubic-bezier(0.3, 0, 0.2, 1) 0.100s;
+}
+
+.sort-widget.is-edge-right.is-expanded {
+  right: 0 !important;
+  left: auto !important;
+  width: 355.98px;
+  height: 114.40px;
+  transform: none;
+  cursor: default;
+  /* Expanding: Continuous, ultra-smooth unroll to the left (<=750ms total) */
+  transition:
+    height 0.167s cubic-bezier(0.25, 0.1, 0.25, 1) 0s,
+    width 0.417s cubic-bezier(0.3, 0.2, 0.1, 1) 0s;
+}
+
+/* Edge Switch Transition Suppressor */
+.sort-widget.no-transition,
+.sort-widget.no-transition * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Outer Border Polyline & Header Text SVG */
+.sort-outer-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  overflow: visible;
+}
+
+.sort-border-line {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 1.5px;
+  stroke-miterlimit: 10;
+}
+
+.sort-header-text {
+  font-family: var(--font-nopitac-regular);
+  font-size: 21px;
+  font-weight: 400;
+  fill: #000000;
+  stroke: #000000;
+  stroke-width: 0px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  paint-order: stroke fill;
+  pointer-events: none;
+  user-select: none;
+  /* Collapsing: smoothly shrink stroke back to 0px over 280ms */
+  transition: stroke-width 0.280s cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+.sort-widget.is-expanded .sort-header-text {
+  font-family: var(--font-nopitac-regular);
+  font-weight: 400;
+  stroke-width: 0.85px;
+  /* Expanding: starts immediately on click and finishes when panel expansion ends (417ms) */
+  transition: stroke-width 0.417s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Clickable Header Bar */
+.sort-header {
+  position: absolute;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.is-edge-top .sort-header {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 29.46px;
+}
+
+.is-edge-left .sort-header {
+  top: 0;
+  left: 0;
+  width: 29.46px;
+  height: 100%;
+}
+
+.is-edge-right .sort-header {
+  top: 0;
+  right: 0;
+  left: auto;
+  width: 29.46px;
+  height: 100%;
+}
+
+/* Expandable Content Container */
+.sort-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 5;
+}
+
+.sort-widget.is-expanded .sort-content {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.25s ease 0.08s;
+}
+
+.sort-inner-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.inner-bracket {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 1px;
+  stroke-miterlimit: 10;
+}
+
+.inner-divider-thin {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 0.25px;
+  stroke-miterlimit: 10;
+}
+
+.sort-section-title {
+  font-family: "HelveticaNeue-Medium", var(--font-nopitac-regular);
+  font-size: 16px;
+  font-weight: 500;
+  fill: #000000;
+  user-select: none;
+  pointer-events: none;
+}
+
+.sort-domains-title-large {
+  font-family: var(--font-nopitac-regular);
+  font-size: 21px;
+  font-weight: 400;
+  fill: #000000;
+  user-select: none;
+  pointer-events: none;
+}
+
+.sort-option-label {
+  font-family: var(--font-nopitac-regular);
+  font-size: 16px;
+  font-weight: 400;
+  fill: #333333;
+  user-select: none;
+  pointer-events: none;
+  transition: fill 0.15s ease;
+}
+
+/* Sort Panel DomainType Chips Container */
+.sort-domains-list {
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  z-index: 6;
+}
+
+.sort-domains-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Top edge: single centered column */
+.sort-domains-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+}
+
+/* Left edge: 2-column right-aligned grid (matching new__sort left edge.svg) */
+.sort-domains-left {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: end;
+  justify-items: end;
+  align-items: start;
+  align-content: start;
+  column-gap: 10px;
+  row-gap: 4px;
+  padding: 2px 0;
+}
+
+/* Right edge: 2-column left-aligned grid (matching new__sort right edge.svg) */
+.sort-domains-right {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  justify-items: start;
+  align-items: start;
+  align-content: start;
+  column-gap: 10px;
+  row-gap: 4px;
+  padding: 2px 0;
+}
+
+.sort-domain-chip {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.14s ease, opacity 0.14s ease, outline 0.14s ease;
+}
+
+.sort-domain-chip svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.sort-domain-chip:hover {
+  transform: scale(1.03);
+}
+
+.sort-domain-chip.is-selected {
+  outline: 1.5px solid #000000;
+  outline-offset: 1px;
+}
+
+.sort-option-row:hover .sort-option-label,
+.sort-option-row.is-selected .sort-option-label {
+  fill: #000000;
+}
+
+/* Tick Boxes */
+.sort-option-row {
+  cursor: pointer;
+}
+
+.sort-tick-rect {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 0.5px;
+  stroke-miterlimit: 10;
+  transition: fill 0.15s ease;
+}
+
+.sort-tick-underline {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 0.5px;
+  stroke-miterlimit: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* State 2: Hover -> square outline + bottom underline */
+.sort-option-row:hover .sort-tick-underline {
+  opacity: 1 !important;
+}
+
+/* State 3: Selected -> square filled with #b3b3b3 + bottom underline */
+.sort-option-row.is-selected .sort-tick-rect {
+  fill: #b3b3b3 !important;
+}
+
+.sort-option-row.is-selected .sort-tick-underline {
+  opacity: 1 !important;
+}
+
+/* Directional Slide-In Stagger Choreography (AE Timing) */
+.sort-layer {
+  opacity: 0;
+  transition:
+    opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Top Edge: options slide down into place */
+.sort-widget.is-edge-top .sort-layer {
+  transform: translateY(-8px);
+}
+.sort-widget.is-edge-top.is-expanded .sort-layer {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Left Edge: options slide from left into place */
+.sort-widget.is-edge-left .sort-layer {
+  transform: translateX(-12px);
+}
+.sort-widget.is-edge-left.is-expanded .sort-layer {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Right Edge: options slide from right into place */
+.sort-widget.is-edge-right .sort-layer {
+  transform: translateX(12px);
+}
+.sort-widget.is-edge-right.is-expanded .sort-layer {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Stagger Delays matching After Effects */
+.sort-widget.is-expanded .sort-stagger-1 { transition-delay: 0.12s; }
+.sort-widget.is-expanded .sort-stagger-2 { transition-delay: 0.15s; }
+.sort-widget.is-expanded .sort-stagger-3 { transition-delay: 0.18s; }
+.sort-widget.is-expanded .sort-stagger-4 { transition-delay: 0.21s; }
+.sort-widget.is-expanded .sort-stagger-5 { transition-delay: 0.24s; }
+.sort-widget.is-expanded .sort-stagger-6 { transition-delay: 0.27s; }
+.sort-widget.is-expanded .sort-stagger-7 { transition-delay: 0.30s; }
+.sort-widget.is-expanded .sort-stagger-8 { transition-delay: 0.33s; }
+
+/* ============================================================
+   DOMAIN EXTENSION PANEL
+   Attached dynamically to Add Person Button:
+     - Top Edge:   150.61 × 303.72 px (Left or Right side)
+     - Left Edge:  285.52 × 171.27 px (Top or Bottom, aligned to Col 1 at +41.98px)
+     - Right Edge: 285.52 × 171.27 px (Top or Bottom, aligned to Col 1/2 divider)
+   Animations match domain top/left/right edge.mp4 (30fps After Effects):
+     1. Outer border polyline draws continuously from Add Person edge around corner
+     2. White panel background wipes open cleanly behind the drawing border
+     3. Inner layers stagger in sequentially (bracket -> domains+chips -> new domain -> enter -> colour -> done)
+============================================================ */
+.field-input-box[data-field="domain"] {
+  caret-color: transparent;
+}
+
+.domain-panel-widget {
+  position: absolute;
+  background-color: transparent;
+  z-index: 1001;
+  box-sizing: border-box;
+  display: none;
+  pointer-events: none;
+  user-select: none;
+}
+
+.domain-panel-widget.is-open {
+  display: block;
+  pointer-events: auto;
+}
+
+/* Directional white background wipe strictly locked behind the drawing outer border */
+.domain-panel-bg {
+  position: absolute;
+  inset: 0;
+  background-color: #ffffff;
+  z-index: 0;
+  pointer-events: none;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.22s cubic-bezier(0.3, 0, 0.2, 1) 0s;
+}
+
+/* Top edge: horizontal top line draws first (0-140ms), then vertical side + white bg wipe DOWN */
+.domain-panel-widget.is-edge-top .domain-panel-bg {
+  clip-path: inset(0 0 100% 0);
+}
+.domain-panel-widget.is-edge-top.is-open .domain-panel-bg {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.32s cubic-bezier(0.25, 0.1, 0.25, 1) 0.14s;
+}
+
+/* Left edge: vertical left line draws first (0-130ms), then horizontal edge + white bg wipe RIGHT */
+.domain-panel-widget.is-edge-left .domain-panel-bg {
+  clip-path: inset(0 100% 0 0);
+}
+.domain-panel-widget.is-edge-left.is-open .domain-panel-bg {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.33s cubic-bezier(0.25, 0.1, 0.25, 1) 0.13s;
+}
+
+/* Right edge: vertical right line draws first (0-130ms), then horizontal edge + white bg wipe LEFT */
+.domain-panel-widget.is-edge-right .domain-panel-bg {
+  clip-path: inset(0 0 0 100%);
+}
+.domain-panel-widget.is-edge-right.is-open .domain-panel-bg {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.33s cubic-bezier(0.25, 0.1, 0.25, 1) 0.13s;
+}
+
+/* Outer Border and SVG elements */
+.domain-panel-outer-svg {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* Animated outer border polyline: draws outward from Add Person anchor around the corner */
+.domain-outer-border {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 1.5px;
+  stroke-miterlimit: 10;
+  stroke-dasharray: var(--domain-border-len, 460);
+  stroke-dashoffset: var(--domain-border-len, 460);
+  transition: stroke-dashoffset 0.26s cubic-bezier(0.3, 0, 0.2, 1) 0s;
+}
+
+.domain-panel-widget.is-open .domain-outer-border {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.46s cubic-bezier(0.25, 0.1, 0.25, 1) 0s;
+}
+
+/* Staggered inner layer reveal matching 30fps AE reference videos */
+.domain-anim-layer {
+  opacity: 0;
+  transform: translateY(-7px);
+  transition:
+    opacity 0.10s ease-in 0s,
+    transform 0.10s ease-in 0s;
+}
+
+.domain-panel-widget.is-edge-left.is-side-top .domain-anim-layer,
+.domain-panel-widget.is-edge-right.is-side-top .domain-anim-layer {
+  transform: translateY(7px);
+}
+
+.domain-panel-widget.is-open .domain-anim-layer {
+  opacity: 1;
+  transform: translate(0, 0);
+  transition:
+    opacity 0.11s ease-out,
+    transform 0.11s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.domain-panel-widget.is-open .domain-stagger-1 { transition-delay: 0.14s; }
+.domain-panel-widget.is-open .domain-stagger-2 { transition-delay: 0.21s; }
+.domain-panel-widget.is-open .domain-stagger-3 { transition-delay: 0.28s; }
+.domain-panel-widget.is-open .domain-stagger-4 { transition-delay: 0.35s; }
+.domain-panel-widget.is-open .domain-stagger-5 { transition-delay: 0.42s; }
+.domain-panel-widget.is-open .domain-stagger-6 { transition-delay: 0.49s; }
+
+.domain-title {
+  font-family: var(--font-nopitac-regular);
+  font-size: 21px;
+  fill: #000000;
+  pointer-events: none;
+  user-select: none;
+}
+
+.domain-bracket {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 1px;
+  stroke-miterlimit: 10;
+}
+
+.domain-bracket-thin {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 0.25px;
+  stroke-miterlimit: 10;
+}
+
+.domain-input-placeholder {
+  font-family: var(--font-nopitac-bold);
+  font-size: 14px;
+  font-weight: 700;
+  fill: #808080;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.15s ease;
+}
+
+.domain-done-label {
+  font-family: var(--font-nopitac-bold);
+  font-size: 14px;
+  font-weight: 700;
+  fill: #808080;
+  pointer-events: none;
+  user-select: none;
+  transition: fill 0.15s ease;
+}
+
+.domain-done-group:hover .domain-done-label {
+  fill: #000000;
+}
+
+/* Scrollable Domain List */
+.domain-list-scroll {
+  box-sizing: border-box;
+  padding: 3px 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4.5px;
+  z-index: 2;
+}
+
+.domain-list-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.top-domain-list {
+  align-items: center;
+}
+
+.left-domain-list {
+  align-items: flex-start;
+}
+
+.right-domain-list {
+  align-items: flex-end;
+}
+
+.domain-chip-wrapper {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  user-select: none;
+}
+
+.domain-chip-wrapper:hover {
+  transform: scale(1.03);
+  opacity: 0.92;
+}
+
+.domain-chip-wrapper svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Interactive HTML Inputs Overlay */
+.domain-html-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-nopitac-bold);
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  padding: 0 4px;
+  box-sizing: border-box;
+  line-height: 18px;
+  z-index: 2;
+}
+
+.domain-done-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  z-index: 2;
+}
+
+/* Color Picker Swatches */
+.domain-color-picker {
+  box-sizing: border-box;
+  padding: 0 4px;
+  background-color: #ffffff;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.domain-color-picker:hover,
+.domain-color-picker.is-active,
+.domain-panel-widget:hover .domain-color-picker {
+  opacity: 1;
+}
+
+.domain-color-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.domain-color-dot:hover {
+  transform: scale(1.3);
+}
+
+.domain-color-dot.is-selected {
+  border: 1.5px solid #000000;
+  transform: scale(1.3);
+}
+
+.domain-color-native-label {
+  position: relative;
+  width: 11px;
+  height: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  line-height: 1;
+  color: #666;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.domain-native-color-input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  left: 0;
+  top: 0;
+}
+
+/* ============================================================
+   PHOTO PANEL TOOL (Secondary Extension Panel)
+============================================================ */
+.photo-panel-widget {
+  position: absolute;
+  background-color: transparent;
+  z-index: 1002;
+  box-sizing: border-box;
+  display: none;
+  pointer-events: none;
+  user-select: none;
+  opacity: 1;
+}
+
+.photo-panel-widget.is-open {
+  display: block;
+  pointer-events: auto;
+}
+
+.photo-panel-widget.is-closing {
+  opacity: 0;
+  transition: opacity 0.25s ease-out;
+}
+
+.photo-panel-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+}
+
+/* White Base Plate */
+.photo-panel-base {
+  opacity: 0;
+  transition: opacity 0.15s ease-out 0s;
+}
+
+.photo-panel-widget.is-open .photo-panel-base {
+  opacity: 1;
+}
+
+/* Outer Border Polyline Trim Path Animation */
+.photo-outer-border {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 1.5px;
+  stroke-miterlimit: 10;
+  stroke-linecap: square;
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  transition: stroke-dashoffset 0.40s cubic-bezier(0.193, 0.082, 0.17, 1) 0s;
+}
+
+.photo-panel-widget.is-open .photo-outer-border {
+  stroke-dashoffset: 0;
+}
+
+/* Stage Box Background Scale Animations */
+.photo-layer-stage {
+  transform-box: fill-box;
+  opacity: 0;
+}
+
+/* Top Edge: Stage scales down vertically from top */
+.photo-panel-widget.is-edge-top .photo-layer-stage {
+  transform-origin: center top;
+  transform: scaleY(0);
+  transition: transform 0.080s cubic-bezier(0.333, 0, 0.307, 1) 0.133s,
+              opacity 0.040s ease-out 0.133s;
+}
+.photo-panel-widget.is-edge-top.is-open .photo-layer-stage {
+  transform: scaleY(1);
+  opacity: 1;
+}
+
+/* Left Edge: Stage scales out horizontally from left */
+.photo-panel-widget.is-edge-left .photo-layer-stage {
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.080s cubic-bezier(0.191, 0, 0.096, 1) 0.167s,
+              opacity 0.040s ease-out 0.167s;
+}
+.photo-panel-widget.is-edge-left.is-open .photo-layer-stage {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* Right Edge: Stage scales out horizontally from right */
+.photo-panel-widget.is-edge-right .photo-layer-stage {
+  transform-origin: right center;
+  transform: scaleX(0);
+  transition: transform 0.080s cubic-bezier(0.117, 0, 0.139, 1) 0.167s,
+              opacity 0.040s ease-out 0.167s;
+}
+.photo-panel-widget.is-edge-right.is-open .photo-layer-stage {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------
+   Staggered Layer Transitions
+------------------------------------------------------------ */
+.photo-panel-layer {
+  opacity: 0;
+}
+
+/* TOP EDGE: Translates translateY(-13.8px) -> translateY(0) */
+.photo-panel-widget.is-edge-top .photo-layer-frame,
+.photo-panel-widget.is-edge-top .photo-layer-controls,
+.photo-panel-widget.is-edge-top .photo-layer-instructions,
+.photo-panel-widget.is-edge-top .photo-layer-pick,
+.photo-panel-widget.is-edge-top .photo-layer-done {
+  transform: translateY(-13.8px);
+}
+
+.photo-panel-widget.is-edge-top.is-open .photo-layer-frame,
+.photo-panel-widget.is-edge-top.is-open .photo-layer-controls,
+.photo-panel-widget.is-edge-top.is-open .photo-layer-instructions,
+.photo-panel-widget.is-edge-top.is-open .photo-layer-pick,
+.photo-panel-widget.is-edge-top.is-open .photo-layer-done {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.photo-panel-widget.is-edge-top .photo-layer-frame {
+  transition: transform 0.120s cubic-bezier(0.097, 0, 0.085, 1) 0.200s,
+              opacity 0.080s ease-out 0.200s;
+}
+.photo-panel-widget.is-edge-top .photo-layer-controls {
+  transition: transform 0.120s cubic-bezier(0.097, 0, 0.085, 1) 0.267s,
+              opacity 0.080s ease-out 0.267s;
+}
+.photo-panel-widget.is-edge-top .photo-layer-instructions {
+  transition: transform 0.120s cubic-bezier(0.097, 0, 0.085, 1) 0.333s,
+              opacity 0.080s ease-out 0.333s;
+}
+.photo-panel-widget.is-edge-top .photo-layer-pick {
+  transition: transform 0.120s cubic-bezier(0.097, 0, 0.085, 1) 0.400s,
+              opacity 0.080s ease-out 0.400s;
+}
+.photo-panel-widget.is-edge-top .photo-layer-done {
+  transition: transform 0.120s cubic-bezier(0.097, 0, 0.085, 1) 0.467s,
+              opacity 0.080s ease-out 0.467s;
+}
+
+/* LEFT EDGE: Translates translateX(-10px) -> translateX(0) */
+.photo-panel-widget.is-edge-left .photo-layer-frame,
+.photo-panel-widget.is-edge-left .photo-layer-controls,
+.photo-panel-widget.is-edge-left .photo-layer-instructions,
+.photo-panel-widget.is-edge-left .photo-layer-pick,
+.photo-panel-widget.is-edge-left .photo-layer-done {
+  transform: translateX(-10px);
+}
+
+.photo-panel-widget.is-edge-left.is-open .photo-layer-frame,
+.photo-panel-widget.is-edge-left.is-open .photo-layer-controls,
+.photo-panel-widget.is-edge-left.is-open .photo-layer-instructions,
+.photo-panel-widget.is-edge-left.is-open .photo-layer-pick,
+.photo-panel-widget.is-edge-left.is-open .photo-layer-done {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.photo-panel-widget.is-edge-left .photo-layer-frame {
+  transition: transform 0.120s cubic-bezier(0.191, 0, 0.096, 1) 0.233s,
+              opacity 0.080s ease-out 0.233s;
+}
+.photo-panel-widget.is-edge-left .photo-layer-controls {
+  transition: transform 0.120s cubic-bezier(0.191, 0, 0.096, 1) 0.300s,
+              opacity 0.080s ease-out 0.300s;
+}
+.photo-panel-widget.is-edge-left .photo-layer-instructions {
+  transition: transform 0.120s cubic-bezier(0.191, 0, 0.096, 1) 0.400s,
+              opacity 0.080s ease-out 0.400s;
+}
+.photo-panel-widget.is-edge-left .photo-layer-pick {
+  transition: transform 0.120s cubic-bezier(0.191, 0, 0.096, 1) 0.467s,
+              opacity 0.080s ease-out 0.467s;
+}
+.photo-panel-widget.is-edge-left .photo-layer-done {
+  transition: transform 0.120s cubic-bezier(0.191, 0, 0.096, 1) 0.533s,
+              opacity 0.080s ease-out 0.533s;
+}
+
+/* RIGHT EDGE: Translates translateX(9.7px) -> translateX(0) */
+.photo-panel-widget.is-edge-right .photo-layer-frame,
+.photo-panel-widget.is-edge-right .photo-layer-controls,
+.photo-panel-widget.is-edge-right .photo-layer-instructions,
+.photo-panel-widget.is-edge-right .photo-layer-pick,
+.photo-panel-widget.is-edge-right .photo-layer-done {
+  transform: translateX(9.7px);
+}
+
+.photo-panel-widget.is-edge-right.is-open .photo-layer-frame,
+.photo-panel-widget.is-edge-right.is-open .photo-layer-controls,
+.photo-panel-widget.is-edge-right.is-open .photo-layer-instructions,
+.photo-panel-widget.is-edge-right.is-open .photo-layer-pick,
+.photo-panel-widget.is-edge-right.is-open .photo-layer-done {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.photo-panel-widget.is-edge-right .photo-layer-frame {
+  transition: transform 0.120s cubic-bezier(0.117, 0, 0.139, 1) 0.233s,
+              opacity 0.080s ease-out 0.233s;
+}
+.photo-panel-widget.is-edge-right .photo-layer-controls {
+  transition: transform 0.120s cubic-bezier(0.117, 0, 0.139, 1) 0.267s,
+              opacity 0.080s ease-out 0.267s;
+}
+.photo-panel-widget.is-edge-right .photo-layer-instructions {
+  transition: transform 0.120s cubic-bezier(0.117, 0, 0.139, 1) 0.367s,
+              opacity 0.080s ease-out 0.367s;
+}
+.photo-panel-widget.is-edge-right .photo-layer-pick {
+  transition: transform 0.120s cubic-bezier(0.117, 0, 0.139, 1) 0.433s,
+              opacity 0.080s ease-out 0.433s;
+}
+.photo-panel-widget.is-edge-right .photo-layer-done {
+  transition: transform 0.120s cubic-bezier(0.117, 0, 0.139, 1) 0.500s,
+              opacity 0.080s ease-out 0.500s;
+}
+
+.photo-svg-btn {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.photo-svg-btn:hover {
+  opacity: 0.65;
+}
+
+.photo-svg-btn rect.hit-area {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.photo-instruction-text {
+  pointer-events: none;
+}
+
+.center-info-panel.is-theme-dark {
+  background-color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+.center-info-panel.is-theme-dark .center-info-header {
+  background-color: #000000 !important;
+}
+
+.center-info-panel.is-theme-dark .center-info-meta {
+  color: #ffffff !important;
+}
+
+.center-info-panel.is-theme-dark .center-info-body {
+  color: #ffffff !important;
+}
+
+.center-info-panel.is-theme-dark .center-info-arc-svg path {
+  stroke: #ffffff !important;
+}
+
+/* ============================================================
+   BOARD CONCENTRIC CIRCLES (FORMATION OF NAMES)
+   Centered at (720, 450) with radii 183.2, 243.2, 303.2 px
+============================================================ */
+.board-concentric-circles-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.board-center-info-group {
+  pointer-events: none;
+}
+
+.concentric-ring-text {
+  font-family: var(--font-nopitac-custom);
+  font-size: 36px;
+  fill: #000000;
+  user-select: none;
+  pointer-events: none;
+  text-rendering: geometricPrecision;
+}
+
+.concentric-name-group {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.concentric-name-group:hover {
+  opacity: 0.72;
+}
+
+.selected-person-dots {
+  pointer-events: none;
+}
+
+/* ============================================================
+   CENTER WHITE CIRCULAR INFORMATION PANEL
+   315 × 315 px on 1440 × 900 artboard, proportionally scaled
+   Invisible inscribed square clipping mask (218 × 218 px)
+   Fixed Nopitac Helvetica name on top, scrollable 16px body below
+============================================================ */
+.center-info-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 315px;
+  height: 315px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.center-info-arc-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 315px;
+  height: 315px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.center-info-panel.has-selection .center-info-arc-svg {
+  opacity: 1;
+}
+
+/* Invisible clipping square mask - shifted up to match Illustrator SVG layout */
+.center-info-square {
+  position: relative;
+  width: 226px;
+  height: 238px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  z-index: 3;
+  margin-top: -10px;
+}
+
+/* Fixed name header at top of square (never scrolls out of view) */
+.center-info-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 2px 6px 2px;
+  background-color: #ffffff;
+  z-index: 2;
+  user-select: none;
+}
+
+.center-info-name-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.nopitac-selectable-text {
+  display: none;
+}
+
+/* Scrollable body inside the invisible clipping square */
+.center-info-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior: contain;
+  padding: 0 4px 16px 4px;
+  box-sizing: border-box;
+}
+
+.center-info-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Place of birth & year of birth: centered, stacked, 16px bold matching SVGs */
+.center-info-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2px;
+  font-family: var(--font-nopitac-bold);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #000000;
+  letter-spacing: -0.03em;
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
+.center-info-place {
+  text-align: center;
+  width: 100%;
+}
+
+.center-info-year {
+  text-align: center;
+  width: 100%;
+}
+
+.center-info-body {
+  font-family: var(--font-nopitac-regular);
+  font-size: 16px;
+  line-height: 1.2;
+  color: #000000;
+  text-align: center;
+  letter-spacing: -0.03em;
+}
+
+.center-info-paragraph {
+  margin: 0 0 12px 0;
+}
+
+.center-info-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================================
+   BOARD LOADING SCREEN (loading screen fin.json Bodymovin vector)
+   Plays until board assets, fonts, and DOM layout are 100% warmed up
+============================================================ */
+.board-loading-layer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #ffffff;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s ease;
+  pointer-events: all;
+}
+
+.board-loading-layer.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.board-lottie-container {
+  width: 100%;
+  height: 100%;
+  max-width: 1440px;
+  max-height: 900px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.board-lottie-container svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* ============================================================
+   BOARD USER BADGE MENU (Bottom-Right, subtle hover sign-out)
+============================================================ */
+.board-user-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+}
+
+.board-user-badge:hover .board-user-menu,
+.board-user-badge:focus-within .board-user-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.board-user-logout-btn {
+  background: #ffffff;
+  border: 1px solid #000000;
+  padding: 3px 8px;
+  font-family: var(--font-nopitac-regular);
+  font-size: 11px;
+  color: #000000;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.board-user-logout-btn:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+

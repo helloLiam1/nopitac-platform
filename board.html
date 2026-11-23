@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOPITAC — Board UI</title>
+  <meta name="description" content="NOPITAC — Board UI with Add Name animated button attached to top edge.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/src/styles/boardUi.css">
+</head>
+<body class="board-ui-body">
+
+  <!-- Full-Screen Vector Loading Layer (Plays loading screen fin.json until board is 100% ready) -->
+  <div id="boardLoadingLayer" class="board-loading-layer" aria-label="Loading Nopitac board" role="status">
+    <div id="boardLottieContainer" class="board-lottie-container"></div>
+  </div>
+
+  <!-- Main Viewport -->
+  <main class="board-ui-viewport" id="boardViewport">
+    <!-- Edge buttons, concentric circles, logo, user badge attached here -->
+  </main>
+
+  <script type="module" src="/src/boardApp.js"></script>
+</body>
+</html>

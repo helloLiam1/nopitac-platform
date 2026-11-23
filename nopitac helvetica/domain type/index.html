@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOPITAC — Domain Type Tool</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-badge">nopitac<span>245</span></div>
+      <h1 class="app-title">Domain Type Tool</h1>
+      <span class="app-subtitle">Helvetica Neue Typographic Bounding Box &amp; Inward Outline</span>
+    </div>
+    <div class="header-actions">
+      <button id="btnCopySVG" class="btn btn-secondary" title="Copy clean SVG markup to clipboard">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        Copy SVG
+      </button>
+      <button id="btnDownloadSVG" class="btn btn-primary" title="Download SVG file">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Download SVG
+      </button>
+    </div>
+  </header>
+
+  <!-- App Body -->
+  <div class="app-body">
+    <!-- Controls Panel (Left) -->
+    <aside class="control-panel">
+      <!-- Mode Selection -->
+      <div class="control-section">
+        <div class="section-label">
+          Alignment &amp; Outline Mode
+          <span class="hint">1, 2, 3</span>
+        </div>
+        <div class="mode-switch-group">
+          <button class="mode-btn" data-mode="left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="6" x2="16" y2="6"></line>
+              <line x1="4" y1="12" x2="12" y2="12"></line>
+              <line x1="4" y1="18" x2="20" y2="18"></line>
+              <polyline points="20 4 20 20 4 20" stroke-width="2.5" stroke="#e2ff1b"></polyline>
+            </svg>
+            Left Mode
+          </button>
+          <button class="mode-btn active" data-mode="center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="6" y1="6" x2="18" y2="6"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+              <line x1="4" y1="18" x2="20" y2="18"></line>
+              <polyline points="4 11 4 20 20 20 20 11" stroke-width="2.5" stroke="#e2ff1b"></polyline>
+            </svg>
+            Center Mode
+          </button>
+          <button class="mode-btn" data-mode="right">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="20" y2="6"></line>
+              <line x1="12" y1="12" x2="20" y2="12"></line>
+              <line x1="4" y1="18" x2="20" y2="18"></line>
+              <polyline points="4 4 4 20 20 20" stroke-width="2.5" stroke="#e2ff1b"></polyline>
+            </svg>
+            Right Mode
+          </button>
+        </div>
+      </div>
+
+      <!-- Presets -->
+      <div class="control-section">
+        <div class="section-label">Presets</div>
+        <div class="presets-grid">
+          <button class="preset-chip" data-text="copywriters" data-mode="center" data-bg="#e2ff1b" data-text-color="#000000">
+            <span class="chip-dot" style="background: #e2ff1b;"></span> copywriters (Center)
+          </button>
+          <button class="preset-chip" data-text="copywriters" data-mode="left" data-bg="#e2ff1b" data-text-color="#000000">
+            <span class="chip-dot" style="background: #e2ff1b;"></span> copywriters (Left)
+          </button>
+          <button class="preset-chip" data-text="copywriters" data-mode="right" data-bg="#e2ff1b" data-text-color="#000000">
+            <span class="chip-dot" style="background: #e2ff1b;"></span> copywriters (Right)
+          </button>
+          <button class="preset-chip" data-text="artists" data-mode="left" data-bg="#1bff7a" data-text-color="#000000">
+            <span class="chip-dot" style="background: #1bff7a;"></span> artists (No Descender)
+          </button>
+          <button class="preset-chip" data-text="music&#10;composers" data-mode="center" data-bg="#ff0e0e" data-text-color="#0b042b">
+            <span class="chip-dot" style="background: #ff0e0e;"></span> music composers (Center)
+          </button>
+          <button class="preset-chip" data-text="music&#10;composers" data-mode="left" data-bg="#ff0e0e" data-text-color="#0b042b">
+            <span class="chip-dot" style="background: #ff0e0e;"></span> music composers (Left)
+          </button>
+          <button class="preset-chip" data-text="music&#10;composers" data-mode="right" data-bg="#ff0e0e" data-text-color="#0b042b">
+            <span class="chip-dot" style="background: #ff0e0e;"></span> music composers (Right)
+          </button>
+        </div>
+      </div>
+
+      <!-- Text Input -->
+      <div class="control-section">
+        <div class="section-label">
+          Text Input
+          <span class="hint">multiline supported</span>
+        </div>
+        <div class="text-input-wrap">
+          <textarea id="domainInput" class="text-input" placeholder="Type letters or words here...">copywriters</textarea>
+        </div>
+      </div>
+
+      <!-- Colors -->
+      <div class="control-section">
+        <div class="section-label">Color Styles</div>
+        <!-- Background Color -->
+        <div class="color-picker-row">
+          <span class="color-label">Background Fill</span>
+          <div class="palette-swatches">
+            <button class="color-swatch active" style="background: #e2ff1b;" data-color="#e2ff1b" title="Yellow"></button>
+            <button class="color-swatch" style="background: #ff0e0e;" data-color="#ff0e0e" title="Red"></button>
+            <button class="color-swatch" style="background: #1bff7a;" data-color="#1bff7a" title="Green"></button>
+            <button class="color-swatch" style="background: #3ce1ff;" data-color="#3ce1ff" title="Cyan"></button>
+            <button class="color-swatch" style="background: #ff6b00;" data-color="#ff6b00" title="Orange"></button>
+            <button class="color-swatch" style="background: #ffffff;" data-color="#ffffff" title="White"></button>
+            <input type="color" id="customBgColor" class="custom-color-input" value="#e2ff1b" title="Custom color">
+          </div>
+        </div>
+        <!-- Text Color -->
+        <div class="color-picker-row" style="margin-top: 10px;">
+          <span class="color-label">Text &amp; Outline</span>
+          <div class="palette-swatches">
+            <button class="color-swatch active" style="background: #000000;" data-text-color="#000000" title="Black"></button>
+            <button class="color-swatch" style="background: #0b042b;" data-text-color="#0b042b" title="Dark Blue"></button>
+            <button class="color-swatch" style="background: #ffffff;" data-text-color="#ffffff" title="White"></button>
+            <input type="color" id="customTextColor" class="custom-color-input" value="#000000" title="Custom text color">
+          </div>
+        </div>
+      </div>
+
+      <!-- Typographic Parameter (Font Size ONLY) -->
+      <div class="control-section">
+        <div class="section-label">Typographic Parameter</div>
+        
+        <!-- Font Size -->
+        <div class="param-row">
+          <div class="param-header">
+            <span>Font Size</span>
+            <span id="valFontSize" class="param-val">16 px (16pt)</span>
+          </div>
+          <input type="range" id="sliderFontSize" class="slider-input" min="8" max="72" step="1" value="16">
+        </div>
+      </div>
+
+      <!-- Export Snippets -->
+      <div class="control-section">
+        <div class="section-label">Code Integration</div>
+        <div class="btn-group">
+          <button id="btnCopySnippet" class="btn btn-secondary" title="Copy ready-to-use HTML/SVG snippet">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            Copy Snippet
+          </button>
+          <button id="btnCopyMetricsJSON" class="btn btn-secondary" title="Copy raw JSON metrics">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            Copy JSON
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Canvas Area (Right) -->
+    <main class="canvas-area">
+      <!-- View Toolbar -->
+      <div class="view-toolbar">
+        <div class="zoom-controls">
+          <span style="font-size: 11px; color: var(--text-muted); margin-right: 4px;">Zoom:</span>
+          <button class="zoom-btn" data-zoom="1">1x (100%)</button>
+          <button class="zoom-btn" data-zoom="2">2x</button>
+          <button class="zoom-btn" data-zoom="4">4x</button>
+          <button class="zoom-btn" data-zoom="8">8x</button>
+          <button class="zoom-btn active" data-zoom="10">10x (Inspect)</button>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">
+          Tracking: -25 &bull; Leading: 12px &bull; Canvas: White
+        </div>
+      </div>
+
+      <!-- Stage Viewport (Always White Background) -->
+      <div id="viewportStage" class="viewport-stage">
+        <div id="stageCard" class="stage-card">
+          <div id="renderContainer" class="render-container">
+            <!-- Clean SVG injected here (No guidelines or squares) -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time Metrics Info Bar (Bottom) -->
+      <footer class="metrics-bar">
+        <div class="metrics-items">
+          <div class="metric-tag">
+            <span>Box:</span>
+            <strong id="statBoxSize">-- &times; --</strong>
+          </div>
+          <div class="metric-tag">
+            <span>Ascender:</span>
+            <span id="statAscender" class="badge-ascender">Checking...</span>
+          </div>
+          <div class="metric-tag">
+            <span>Descender:</span>
+            <span id="statDescender" class="badge-descender">Checking...</span>
+          </div>
+          <div class="metric-tag">
+            <span>Outline Mode:</span>
+            <strong id="statMode" class="val-highlight">center</strong>
+          </div>
+        </div>
+        <div class="metric-tag">
+          <span>Helvetica Neue</span>
+          <span id="statFontDesc">16px &bull; tracking -25 &bull; line-height 12px</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-notice">Copied to clipboard!</div>
+
+  <!-- Application Logic -->
+  <script type="module">
+    import DomainType from './domainType.js';
+    window.DomainType = DomainType;
+
+    (function () {
+      // State
+      const state = {
+        text: 'copywriters',
+        mode: 'center',
+        fontSize: 16,
+        fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+        fontWeight: '400',
+        bgColor: '#e2ff1b',
+        textColor: '#000000',
+        outlineColor: '#000000',
+        zoom: 10
+      };
+
+      // DOM Elements
+      const renderContainer = document.getElementById('renderContainer');
+      const stageCard = document.getElementById('stageCard');
+      const domainInput = document.getElementById('domainInput');
+      const sliderFontSize = document.getElementById('sliderFontSize');
+      const valFontSize = document.getElementById('valFontSize');
+
+      const statBoxSize = document.getElementById('statBoxSize');
+      const statAscender = document.getElementById('statAscender');
+      const statDescender = document.getElementById('statDescender');
+      const statMode = document.getElementById('statMode');
+      const statFontDesc = document.getElementById('statFontDesc');
+
+      const customBgColor = document.getElementById('customBgColor');
+      const customTextColor = document.getElementById('customTextColor');
+      const toast = document.getElementById('toast');
+
+      let currentResult = null;
+
+      // Show Toast
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      }
+
+      // Render Function
+      function render() {
+        currentResult = DomainType.compute(state.text, {
+          mode: state.mode,
+          fontSize: state.fontSize,
+          fontFamily: state.fontFamily,
+          fontWeight: state.fontWeight,
+          bgColor: state.bgColor,
+          textColor: state.textColor,
+          outlineColor: state.outlineColor
+        });
+
+        // Generate clean SVG (no guidelines or squares)
+        const svgCode = DomainType.toSVG(currentResult, {
+          scale: 1
+        });
+
+        renderContainer.innerHTML = svgCode;
+
+        // Update Zoom Scale on stage card
+        stageCard.style.transform = `scale(${state.zoom})`;
+
+        // Update Info Metrics
+        const b = currentResult.box;
+        statBoxSize.textContent = `${b.width.toFixed(2)} × ${b.height.toFixed(2)} px`;
+        
+        if (currentResult.hasAscenders) {
+          statAscender.textContent = 'Yes (l-height: -' + currentResult.fontMetrics.lAscent.toFixed(1) + 'px + 2.5)';
+          statAscender.style.color = '#60a5fa';
+          statAscender.style.background = 'rgba(34, 153, 255, 0.15)';
+        } else {
+          statAscender.textContent = 'No (x-height: -' + currentResult.fontMetrics.xHeight.toFixed(1) + 'px + 2.5)';
+          statAscender.style.color = '#94a3b8';
+          statAscender.style.background = 'rgba(148, 163, 184, 0.15)';
+        }
+
+        if (currentResult.hasDescenders) {
+          statDescender.textContent = 'Yes (p-depth: +' + currentResult.fontMetrics.pDescent.toFixed(1) + 'px + 2.5)';
+          statDescender.style.color = '#f4aaff';
+          statDescender.style.background = 'rgba(244, 170, 255, 0.15)';
+        } else {
+          statDescender.textContent = 'No (Baseline + 2.5px)';
+          statDescender.style.color = '#34d399';
+          statDescender.style.background = 'rgba(52, 211, 153, 0.15)';
+        }
+
+        statMode.textContent = state.mode.toUpperCase() + ' MODE';
+        statFontDesc.textContent = `${state.fontSize}px • tracking -25 • line-height 12px`;
+
+        valFontSize.textContent = `${state.fontSize} px (${state.fontSize}pt)`;
+      }
+
+      // Event Handlers
+      domainInput.addEventListener('input', (e) => {
+        state.text = e.target.value;
+        render();
+      });
+
+      // Mode Buttons
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.mode = btn.getAttribute('data-mode');
+          render();
+        });
+      });
+
+      // Keyboard Shortcuts (1, 2, 3 for modes)
+      window.addEventListener('keydown', (e) => {
+        if (document.activeElement === domainInput) return;
+        if (e.key === '1') {
+          document.querySelector('.mode-btn[data-mode="left"]').click();
+        } else if (e.key === '2') {
+          document.querySelector('.mode-btn[data-mode="center"]').click();
+        } else if (e.key === '3') {
+          document.querySelector('.mode-btn[data-mode="right"]').click();
+        }
+      });
+
+      // Presets
+      document.querySelectorAll('.preset-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const text = chip.getAttribute('data-text');
+          const mode = chip.getAttribute('data-mode');
+          const bg = chip.getAttribute('data-bg');
+          const textColor = chip.getAttribute('data-text-color');
+
+          state.text = text;
+          domainInput.value = text;
+
+          if (mode) {
+            state.mode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => {
+              b.classList.toggle('active', b.getAttribute('data-mode') === mode);
+            });
+          }
+
+          if (bg) {
+            state.bgColor = bg;
+            customBgColor.value = bg;
+            document.querySelectorAll('.color-swatch[data-color]').forEach(s => {
+              s.classList.toggle('active', s.getAttribute('data-color') === bg);
+            });
+          }
+
+          if (textColor) {
+            state.textColor = textColor;
+            state.outlineColor = textColor;
+            customTextColor.value = textColor;
+            document.querySelectorAll('.color-swatch[data-text-color]').forEach(s => {
+              s.classList.toggle('active', s.getAttribute('data-text-color') === textColor);
+            });
+          }
+
+          render();
+        });
+      });
+
+      // Background Color Swatches
+      document.querySelectorAll('.color-swatch[data-color]').forEach(swatch => {
+        swatch.addEventListener('click', () => {
+          document.querySelectorAll('.color-swatch[data-color]').forEach(s => s.classList.remove('active'));
+          swatch.classList.add('active');
+          state.bgColor = swatch.getAttribute('data-color');
+          customBgColor.value = state.bgColor;
+          render();
+        });
+      });
+
+      customBgColor.addEventListener('input', (e) => {
+        state.bgColor = e.target.value;
+        document.querySelectorAll('.color-swatch[data-color]').forEach(s => s.classList.remove('active'));
+        render();
+      });
+
+      // Text Color Swatches
+      document.querySelectorAll('.color-swatch[data-text-color]').forEach(swatch => {
+        swatch.addEventListener('click', () => {
+          document.querySelectorAll('.color-swatch[data-text-color]').forEach(s => s.classList.remove('active'));
+          swatch.classList.add('active');
+          state.textColor = swatch.getAttribute('data-text-color');
+          state.outlineColor = state.textColor;
+          customTextColor.value = state.textColor;
+          render();
+        });
+      });
+
+      customTextColor.addEventListener('input', (e) => {
+        state.textColor = e.target.value;
+        state.outlineColor = e.target.value;
+        document.querySelectorAll('.color-swatch[data-text-color]').forEach(s => s.classList.remove('active'));
+        render();
+      });
+
+      // Font Size Slider
+      sliderFontSize.addEventListener('input', (e) => {
+        state.fontSize = parseFloat(e.target.value);
+        render();
+      });
+
+      // Zoom Buttons
+      document.querySelectorAll('.zoom-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.zoom = parseFloat(btn.getAttribute('data-zoom'));
+          render();
+        });
+      });
+
+      // Copy SVG
+      document.getElementById('btnCopySVG').addEventListener('click', () => {
+        const cleanSVG = DomainType.toSVG(currentResult);
+        navigator.clipboard.writeText(cleanSVG).then(() => {
+          showToast('Clean SVG copied to clipboard!');
+        });
+      });
+
+      // Download SVG
+      document.getElementById('btnDownloadSVG').addEventListener('click', () => {
+        const cleanSVG = DomainType.toSVG(currentResult);
+        const blob = new Blob([cleanSVG], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${state.text.replace(/[\n\s]+/g, '_')}_${state.mode}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('SVG file downloaded!');
+      });
+
+      // Copy Code Snippet
+      document.getElementById('btnCopySnippet').addEventListener('click', () => {
+        const cleanSVG = DomainType.toSVG(currentResult);
+        const snippet = `<!-- Nopitac Domain Type: "${state.text.replace(/\n/g, ' ')}" (${state.mode} mode) -->\n${cleanSVG}`;
+        navigator.clipboard.writeText(snippet).then(() => {
+          showToast('HTML / SVG snippet copied to clipboard!');
+        });
+      });
+
+      // Copy JSON Metrics
+      document.getElementById('btnCopyMetricsJSON').addEventListener('click', () => {
+        const jsonStr = JSON.stringify(currentResult, null, 2);
+        navigator.clipboard.writeText(jsonStr).then(() => {
+          showToast('JSON Metrics copied to clipboard!');
+        });
+      });
+
+      // Initial render
+      render();
+    })();
+  </script>
+</body>
+</html>

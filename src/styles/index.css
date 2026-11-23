@@ -1,0 +1,175 @@
+/* NOPITAC — Pure Paper Aesthetic Design System */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+
+:root {
+  /* Consistent Paper Palette */
+  --bg-primary: #f5f3ec;
+  --bg-surface: #ebe7dd;
+  --bg-input: #fdfcf9;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-focus: rgba(0, 0, 0, 0.28);
+
+  --text-primary: #18181b;
+  --text-secondary: rgba(24, 24, 27, 0.65);
+  --text-muted: rgba(24, 24, 27, 0.4);
+
+  --ink-color: #18181b;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
+  --font-mono: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: rgba(24, 24, 27, 0.18);
+  color: #18181b;
+}
+
+::-moz-selection {
+  background-color: rgba(24, 24, 27, 0.18);
+  color: #18181b;
+}
+
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+button, input {
+  font-family: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Header */
+.app-header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+}
+
+.brand-section {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.brand-logo {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-color);
+  position: relative;
+  display: inline-block;
+}
+
+.brand-logo-mark {
+  position: relative;
+  display: inline-block;
+  padding: 0 4px;
+}
+
+.brand-logo-bracket {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: -3px;
+  height: 5px;
+  border-left: 2px solid var(--ink-color);
+  border-bottom: 2px solid var(--ink-color);
+  border-right: 2px solid var(--ink-color);
+}
+
+.brand-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-action {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  line-height: normal;
+}
+
+.btn-action:hover {
+  background-color: var(--bg-surface);
+  border-color: var(--border-focus);
+}
+
+.btn-action.btn-primary {
+  background-color: var(--ink-color);
+  color: var(--bg-primary);
+  border-color: var(--ink-color);
+}
+
+.btn-action.btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background-color: var(--ink-color);
+  color: var(--bg-primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
