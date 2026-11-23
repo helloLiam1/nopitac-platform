@@ -171,16 +171,21 @@ export class CommunityApp {
       const iconSvg = this.getCompositionIconSvg(user.composition);
       const renderedName = this.nameRenderer.render(user.name, 0);
       const targetScale = 36 / FONT_SIZE;
-      const nameW = Math.round(renderedName.vbWidth * targetScale);
-      const nameH = Math.round(renderedName.vbHeight * targetScale);
-      // Strip selectable text element that was rendering visible duplicate text underneath
-      const cleanSvg = (renderedName.svgString || '').replace(
-        /<text\b[^>]*class="nopitac-selectable-text"[^>]*>[\s\S]*?<\/text>/gi,
-        ''
-      );
+      
+      // Extract clean vector artwork without selectable text or nested svg
+      const cleanArtwork = (renderedName.svgString || '')
+        .replace(/<svg\b[^>]*>/i, '')
+        .replace(/<\/svg>\s*$/i, '')
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .replace(/<text\b[^>]*class="nopitac-selectable-text"[\s\S]*?<\/text>/gi, '')
+        .trim();
+
+      // Tight bounding box for henry who: optical center Y = -10, centered vertically
+      const nameW = Math.round(204 * targetScale);
+      const nameH = Math.round(48 * targetScale);
       const nameSvg = `
-        <svg viewBox="${renderedName.viewBox}" width="${nameW}" height="${nameH}" class="community-username-svg">
-          ${cleanSvg}
+        <svg viewBox="0 -34 204 48" width="${nameW}" height="${nameH}" class="community-username-svg">
+          ${cleanArtwork}
         </svg>
       `;
 

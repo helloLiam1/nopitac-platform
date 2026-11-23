@@ -189,9 +189,10 @@ html, body {
   position: relative;
   display: flex;
   align-items: center;
-  width: 355px;
+  flex: 0 0 auto;
   height: 100%;
-  padding-left: 25px;
+  padding-left: 20px;
+  margin-right: 32px;
   cursor: pointer;
   z-index: 10;
   transition: opacity 0.15s ease;
@@ -208,7 +209,7 @@ html, body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-right: 25px;
+  margin-right: 20px;
 }
 
 .community-user-icon svg {
@@ -219,14 +220,12 @@ html, body {
 .community-username-wrap {
   display: flex;
   align-items: center;
-  flex-grow: 1;
   overflow: visible;
 }
 
 .community-username-svg {
   display: block;
   overflow: visible;
-  height: 44px;
 }
 
 /* --------------------------------------------------------------------------
@@ -239,8 +238,8 @@ html, body {
   display: flex;
   align-items: center;
   flex: 1 1 auto;
-  padding-left: 17px;
-  padding-right: 20px;
+  padding-left: 0;
+  padding-right: 40px;
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
