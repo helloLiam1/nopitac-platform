@@ -71,6 +71,12 @@
     <div class="auth-half auth-half-left">
       <div class="auth-poster-box">
         <div class="auth-poster-rect">
+          <button type="button" id="authBackBtn" class="auth-back-btn" aria-label="Back to main page">
+            <svg class="auth-back-svg" viewBox="0 0 130 39" xmlns="http://www.w3.org/2000/svg">
+              <polyline points="129.5 12 129.5 37.8 0.75 37.8 0.75 0" class="auth-back-bracket" />
+              <text transform="translate(10.37 29.08)" class="auth-back-label"><tspan x="0" y="0">back</tspan></text>
+            </svg>
+          </button>
           <div class="auth-poster-borders"></div>
           <div class="auth-poster-text">
             <span>you’re</span>
@@ -113,16 +119,26 @@
             <input type="password" id="signInPassword" class="auth-field-input" autocomplete="current-password" />
           </div>
 
-          <!-- 3. or (STATIC, NOT CLICKABLE) -->
-          <div class="auth-field-row auth-or-row" style="--field-idx: 3;">
+          <!-- 3. done button -->
+          <div class="auth-field-row auth-done-row" style="--field-idx: 3;">
+            <button type="submit" id="signInDoneBtn" class="auth-done-btn" aria-label="Done sign in">
+              <span class="auth-done-label">done</span>
+              <svg class="auth-done-underline-svg" viewBox="0 0 130 28" preserveAspectRatio="none">
+                <polyline points="129 0 129 26 1 26 1 0" class="auth-field-underline" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- 4. or (STATIC, NOT CLICKABLE) -->
+          <div class="auth-field-row auth-or-row" style="--field-idx: 4;">
             <span class="auth-or-label">or</span>
             <svg class="auth-or-underline-svg" viewBox="0 0 85 28" preserveAspectRatio="none">
               <polyline points="84 0 84 26 1 26 1 0" class="auth-field-underline" />
             </svg>
           </div>
 
-          <!-- 4. sign-in with google -->
-          <div class="auth-field-row auth-google-row" style="--field-idx: 4;">
+          <!-- 5. sign-in with google -->
+          <div class="auth-field-row auth-google-row" style="--field-idx: 5;">
             <span class="auth-google-label">sign-in with google</span>
             <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
               <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
@@ -132,12 +148,10 @@
           </div>
 
           <!-- Mode switch link below -->
-          <div class="auth-field-row auth-toggle-row" style="--field-idx: 5;">
+          <div class="auth-field-row auth-toggle-row" style="--field-idx: 6;">
             <button type="button" class="auth-mode-switch-btn" id="signInToSignUpBtn">don’t have an account? sign
               up</button>
           </div>
-
-          <button type="submit" style="display: none;"></button>
         </form>
 
         <!-- Sign Up Form (Fields animate in from the left, decelerating, under 0.6s) -->
@@ -188,16 +202,26 @@
             <input type="password" id="signUpRePassword" class="auth-field-input" autocomplete="new-password" />
           </div>
 
-          <!-- 6. or (STATIC, NOT CLICKABLE) -->
-          <div class="auth-field-row auth-or-row" style="--field-idx: 6;">
+          <!-- 6. done button -->
+          <div class="auth-field-row auth-done-row" style="--field-idx: 6;">
+            <button type="submit" id="signUpDoneBtn" class="auth-done-btn" aria-label="Done sign up">
+              <span class="auth-done-label">done</span>
+              <svg class="auth-done-underline-svg" viewBox="0 0 130 28" preserveAspectRatio="none">
+                <polyline points="129 0 129 26 1 26 1 0" class="auth-field-underline" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- 7. or (STATIC, NOT CLICKABLE) -->
+          <div class="auth-field-row auth-or-row" style="--field-idx: 7;">
             <span class="auth-or-label">or</span>
             <svg class="auth-or-underline-svg" viewBox="0 0 85 28" preserveAspectRatio="none">
               <polyline points="84 0 84 26 1 26 1 0" class="auth-field-underline" />
             </svg>
           </div>
 
-          <!-- 7. sign-up with google -->
-          <div class="auth-field-row auth-google-row" style="--field-idx: 7;">
+          <!-- 8. sign-up with google -->
+          <div class="auth-field-row auth-google-row" style="--field-idx: 8;">
             <span class="auth-google-label">sign-up with google</span>
             <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
               <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
@@ -207,12 +231,10 @@
           </div>
 
           <!-- Mode switch link below -->
-          <div class="auth-field-row auth-toggle-row" style="--field-idx: 8;">
+          <div class="auth-field-row auth-toggle-row" style="--field-idx: 9;">
             <button type="button" class="auth-mode-switch-btn" id="signUpToSignInBtn">already have an account? sign
               in</button>
           </div>
-
-          <button type="submit" style="display: none;"></button>
         </form>
       </div>
 

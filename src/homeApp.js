@@ -23,7 +23,7 @@ export const STAGES = [
   { idx: 10, color: '#6a76ff', wipeStart: 4017, wipeEnd: 4079, holdEnd: 4399, text: 'a tavern for the wanderers' },
   { idx: 11, color: '#d8ff2a', wipeStart: 4399, wipeEnd: 4461, holdEnd: 4800, text: 'a beautiful looking list' },
   { idx: 12, color: '#27ff83', wipeStart: 4800, wipeEnd: 4862, holdEnd: 5200, text: 'an investment for your passion' },
-  { idx: 13, color: '#f5003a', wipeStart: 5200, wipeEnd: 5262, holdEnd: 5609, text: 'a repository of inspiration 2' },
+  { idx: 13, color: '#f5003a', wipeStart: 5200, wipeEnd: 5262, holdEnd: 5609, text: 'that fourplay that never stops' },
   { idx: 14, color: '#6a76ff', wipeStart: 5609, wipeEnd: 5671, holdEnd: 6041, text: 'an antigate-keeping platform' },
   { idx: 15, color: '#d8ff2a', wipeStart: 6041, wipeEnd: 6103, holdEnd: 6400, text: 'a piggy bank with people' },
   { idx: 16, color: '#27ff83', wipeStart: 6400, wipeEnd: 6462, holdEnd: 6758, text: 'a binocular to stock on someone’s mind' }
@@ -62,6 +62,7 @@ export class HomeApp {
 
     // Auth screen elements
     this.authScreen = document.getElementById('authScreen');
+    this.authBackBtn = document.getElementById('authBackBtn');
     this.signInForm = document.getElementById('signInForm');
     this.signUpForm = document.getElementById('signUpForm');
     this.signInGoogleBtn = document.getElementById('signInGoogleBtn');
@@ -209,7 +210,16 @@ export class HomeApp {
 
     // Also support global keyboard navigation (Up / Down / Space)
     window.addEventListener('keydown', (e) => {
-      if (this.authModal && this.authModal.classList.contains('is-open')) return;
+      const target = e.target;
+      const isTyping =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable);
+      if (isTyping || (this.authScreen && this.authScreen.classList.contains('is-open'))) {
+        return;
+      }
       if (e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
         e.preventDefault();
         this.nextStage();
@@ -249,6 +259,14 @@ export class HomeApp {
     }
 
     // 4. Auth screen events & interactive bindings
+    if (this.authBackBtn) {
+      this.authBackBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.closeAuth();
+      });
+    }
+
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.authScreen && this.authScreen.classList.contains('is-open')) {
         this.closeAuth();
@@ -454,8 +472,8 @@ export class HomeApp {
 
     // Grouped content in the center of the right half
     const mode = this.authScreen.getAttribute('data-mode') || 'signin';
-    const neededH = mode === 'signup' ? 740 : 620;
-    const availH = winH - 60;
+    const neededH = mode === 'signup' ? 810 : 680;
+    const availH = winH - 48;
     const availW = halfW - 40;
     const scale = Math.min(1, Math.min(availH / neededH, availW / 384));
     this.authScreen.style.setProperty('--auth-right-scale', Math.max(0.60, scale).toFixed(3));

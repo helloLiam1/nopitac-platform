@@ -1,21 +1,103 @@
 import lottie from 'lottie-web';
 import loadingAnimationData from '../assets/loading_animation.json';
 
+const BRAND_LOADING_COLORS = [
+  { hex: '#f5003a', rgba: [0.9607843137254902, 0, 0.22745098039215686, 1] }, // brand red
+  { hex: '#6a76ff', rgba: [0.41568627450980394, 0.4627450980392157, 1, 1] }, // brand blue
+  { hex: '#27ff83', rgba: [0.15294117647058825, 1, 0.5137254901960784, 1] } // brand green
+];
+
+function recolorLoadingAnimation(baseData, rgba) {
+  const clone = typeof structuredClone === 'function'
+    ? structuredClone(baseData)
+    : JSON.parse(JSON.stringify(baseData));
+
+  const fixShapeItems = (items) => {
+    if (!Array.isArray(items)) return;
+    for (const item of items) {
+      if (item.ty === 'fl' && item.c && Array.isArray(item.c.k)) {
+        const [r, g, b] = item.c.k;
+        // Preserve black fills; recolor brand accent fills and enforce full opacity
+        if (r > 0.1 || g > 0.1 || b > 0.1) {
+          item.c.k = [...rgba];
+        }
+        if (item.o && item.o.a === 0) item.o.k = 100;
+      }
+      if (item.ty === 'tr' && item.o && item.o.a === 0) {
+        item.o.k = 100;
+      }
+      if (Array.isArray(item.it)) {
+        fixShapeItems(item.it);
+      }
+    }
+  };
+
+  const fixEffects = (effects) => {
+    if (!Array.isArray(effects)) return;
+    for (const effect of effects) {
+      if (!Array.isArray(effect.ef)) continue;
+      for (const prop of effect.ef) {
+        if ((prop.mn === 'ADBE Fill-0002' || prop.nm === 'Color') && prop.v) {
+          if (prop.v.a === 1 && Array.isArray(prop.v.k)) {
+            for (const kf of prop.v.k) {
+              if (Array.isArray(kf.s) && (kf.s[0] > 0.1 || kf.s[1] > 0.1 || kf.s[2] > 0.1)) {
+                kf.s = [...rgba];
+              }
+            }
+          } else if (Array.isArray(prop.v.k) && (prop.v.k[0] > 0.1 || prop.v.k[1] > 0.1 || prop.v.k[2] > 0.1)) {
+            prop.v.k = [...rgba];
+          }
+        }
+        if ((prop.mn === 'ADBE Fill-0005' || prop.nm === 'Opacity') && prop.v && prop.v.a === 0) {
+          prop.v.k = 1;
+        }
+      }
+    }
+  };
+
+  const fixLayers = (layers) => {
+    if (!Array.isArray(layers)) return;
+    for (const layer of layers) {
+      if (layer.ty !== 3 && layer.ks && layer.ks.o && layer.ks.o.a === 0) {
+        layer.ks.o.k = 100;
+      }
+      if (Array.isArray(layer.ef)) {
+        fixEffects(layer.ef);
+      }
+      if (Array.isArray(layer.shapes)) {
+        fixShapeItems(layer.shapes);
+      }
+    }
+  };
+
+  fixLayers(clone.layers);
+  if (Array.isArray(clone.assets)) {
+    for (const asset of clone.assets) {
+      fixLayers(asset.layers);
+    }
+  }
+  return clone;
+}
+
 /**
  * BoardLoadingScreen
  * Plays the vector loading animation (loading screen fin.json)
  * until all board assets, fonts, and DOM layouts are 100% ready.
- * 
+ *
  * Guarantees:
+ *  - Picks a random brand color (red, blue, or green) for loading screens at full 100% opacity
  *  - Minimum duration is preserved (full acronym sequence at 120fps = ~2.48s)
- *  - Dynamically decreases speed if board files take longer to load so there is zero freeze
- *  - Transitions smoothly to the board with zero lag or pop-in
+ *  - Dynamically decreases speed if assets take longer to load so there is zero freeze
+ *  - Transitions smoothly to the page with zero lag or pop-in
  */
 export class BoardLoadingScreen {
   constructor(options = {}) {
     this.layer = document.getElementById('boardLoadingLayer');
     this.container = document.getElementById('boardLottieContainer');
     this.minDurationMs = options.minDurationMs || 2483; // 298 frames at 120fps
+    const picked = BRAND_LOADING_COLORS[Math.floor(Math.random() * BRAND_LOADING_COLORS.length)];
+    this.activeColor = picked.hex;
+    this.animationData = recolorLoadingAnimation(loadingAnimationData, picked.rgba);
     this.startTime = performance.now();
     this.isBoardReady = false;
     this.hasCompleted = false;
@@ -31,7 +113,7 @@ export class BoardLoadingScreen {
       renderer: 'svg',
       loop: true,
       autoplay: true,
-      animationData: loadingAnimationData,
+      animationData: this.animationData,
       rendererSettings: {
         preserveAspectRatio: 'xMidYMid meet',
         progressiveLoad: false

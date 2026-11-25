@@ -20,6 +20,10 @@
 import { NopitacRenderer, FONT_SIZE } from './engine/nopitacRenderer.js';
 import DomainType from './engine/domainType.js';
 import { nopitacService } from './lib/nopitacService.js';
+import { BoardLoadingScreen } from './components/BoardLoadingScreen.js';
+
+const loadingScreen = new BoardLoadingScreen({ minDurationMs: 2483 });
+window.__communityLoadingScreen = loadingScreen;
 
 const COMMUNITY_USERS = [
   {
@@ -91,14 +95,12 @@ export class CommunityApp {
     this.remoteSavedNames = null;
 
     this.measureDimensions();
-    this.updatePlatformUserCount();
-    this.renderCommunityUsers();
     this.createRevolvingButtons();
     this.setupUserSignature();
     this.bindEvents();
     this.updateButtons();
 
-    // Hydrate registered users & saved boards from Supabase
+    // Hydrate registered users & saved boards from Supabase before revealing page
     try {
       const [dbUsers, sbUser] = await Promise.all([
         nopitacService.fetchCommunityUsers(),
@@ -117,9 +119,18 @@ export class CommunityApp {
       if (sbUser?.id) {
         this.remoteSavedNames = await nopitacService.getSavedBoardNames(sbUser.id);
       }
-      this.updatePlatformUserCount();
-      this.renderCommunityUsers();
     } catch (e) {}
+
+    try {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+    } catch (e) {}
+
+    this.updatePlatformUserCount();
+    this.renderCommunityUsers();
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    loadingScreen.markReady();
   }
 
   updatePlatformUserCount() {

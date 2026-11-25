@@ -240,6 +240,48 @@ body.home-body {
   box-sizing: border-box;
 }
 
+.auth-back-btn {
+  position: absolute;
+  left: clamp(48px, 4.5vw, 64px);
+  top: 0;
+  width: 129px;
+  height: 38px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 20;
+  transition: opacity 0.15s ease;
+}
+
+.auth-back-btn:hover {
+  opacity: 0.7;
+}
+
+.auth-back-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.auth-back-bracket {
+  fill: none;
+  stroke: #000000;
+  stroke-miterlimit: 10;
+  stroke-width: 2px;
+}
+
+.auth-back-label {
+  fill: #000000;
+  font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
 /* The half underline on the left (black L-border) */
 .auth-poster-borders {
   position: absolute;
@@ -409,6 +451,7 @@ body.home-body {
 .auth-screen.is-open .auth-field-row[style*="--field-idx: 6"] { transition-delay: 0.24s; }
 .auth-screen.is-open .auth-field-row[style*="--field-idx: 7"] { transition-delay: 0.27s; }
 .auth-screen.is-open .auth-field-row[style*="--field-idx: 8"] { transition-delay: 0.29s; }
+.auth-screen.is-open .auth-field-row[style*="--field-idx: 9"] { transition-delay: 0.31s; }
 
 /* Labels & Underlines */
 .auth-field-label {
@@ -484,6 +527,63 @@ body.home-body {
   z-index: 5;
   cursor: text;
   pointer-events: auto;
+}
+
+/* 'done' submit button row (centered below password/re-password) */
+.auth-field-row.auth-done-row {
+  width: 129px;
+  height: 36px;
+  margin: 6px auto 34px auto;
+  cursor: pointer;
+}
+
+.auth-done-btn {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.auth-done-label {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  bottom: 5px;
+  text-align: center;
+  font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #333333;
+  pointer-events: none;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.auth-done-underline-svg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 129px;
+  height: 28px;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.auth-done-btn:hover .auth-done-label,
+.auth-done-btn:focus-visible .auth-done-label {
+  color: #000000;
+}
+
+.auth-done-btn:hover .auth-field-underline,
+.auth-done-btn:focus-visible .auth-field-underline {
+  stroke-width: 2.5px;
 }
 
 /* 'or' row: STATIC visual element, not a clickable button, does not do anything */

@@ -39,7 +39,7 @@ export class BoardButtonsManager {
             label: saved ? 'board saved' : 'save board',
             length: saved ? 155.3 : 142.8268,
             weight: 400,
-            initialTau: 0.1600,
+            initialTau: 0.1250,
             currentEdge: 'left'
           };
         })()
@@ -48,7 +48,7 @@ export class BoardButtonsManager {
           label: 'edit board',
           length: 134.599,
           weight: 400,
-          initialTau: 0.1600,
+          initialTau: 0.1250,
           currentEdge: 'left'
         };
 
@@ -59,7 +59,7 @@ export class BoardButtonsManager {
         label: 'add name',
         length: 146.12,
         weight: 700,
-        initialTau: 0.4433,
+        initialTau: 0.3750,
         currentEdge: 'top'
       });
     }
@@ -76,7 +76,7 @@ export class BoardButtonsManager {
       label: 'sort',
       length: 79.40,
       weight: 400,
-      initialTau: 0.8786,
+      initialTau: 0.8750,
       currentEdge: 'right'
     });
 
