@@ -16,6 +16,7 @@
 import { AddPersonButton } from './AddPersonButton.js';
 import { SortButton } from './SortButton.js';
 import { BoardConcentricCircles } from './BoardConcentricCircles.js';
+import { nopitacService } from '../lib/nopitacService.js';
 
 export class BoardButtonsManager {
   constructor(options = {}) {
@@ -23,38 +24,53 @@ export class BoardButtonsManager {
     this.bottomOffset = 78.6539; // Distance from bottom edge of viewport (guideline at y = 821.35px in 900px viewport)
     this.username = options.username || 'henry who';
     this.emptyMode = Boolean(options.emptyMode);
+    this.isVisiting = Boolean(options.isVisiting);
+    this.authUserId = options.authUserId || null;
 
-    // Button configurations matching Illustrator SVGs
-    // initialTau values match Frame 1 in moving board fin.mp4:
-    //  - search on Left edge at y = 273px
-    //  - add person on Top edge at x = 495px
-    //  - sort on Right edge at y = 393px
-    this.buttons = [
-      {
-        id: 'search',
-        label: 'search',
-        length: 104.16,
-        weight: 400,
-        initialTau: 0.1600,
-        currentEdge: 'left'
-      },
-      {
+    // Button configurations matching Illustrator SVGs:
+    //  - button_edit board.svg (width 134.599) when nothing selected on own board
+    //  - button_edit info.svg  (width 115.3034) when a person is selected on own board
+    //  - button_save board.svg (width 142.8268) when visiting another user's board
+    const primaryBtn = this.isVisiting
+      ? (() => {
+          const saved = this.isBoardSaved();
+          return {
+            id: 'save-board',
+            label: saved ? 'board saved' : 'save board',
+            length: saved ? 155.3 : 142.8268,
+            weight: 400,
+            initialTau: 0.1600,
+            currentEdge: 'left'
+          };
+        })()
+      : {
+          id: 'edit',
+          label: 'edit board',
+          length: 134.599,
+          weight: 400,
+          initialTau: 0.1600,
+          currentEdge: 'left'
+        };
+
+    this.buttons = [primaryBtn];
+    if (!this.isVisiting) {
+      this.buttons.push({
         id: 'add-person',
         label: 'add name',
         length: 146.12,
         weight: 700,
         initialTau: 0.4433,
         currentEdge: 'top'
-      },
-      {
-        id: 'sort',
-        label: 'sort',
-        length: 79.40,
-        weight: 400,
-        initialTau: 0.8786,
-        currentEdge: 'right'
-      }
-    ];
+      });
+    }
+    this.buttons.push({
+      id: 'sort',
+      label: 'sort',
+      length: 79.40,
+      weight: 400,
+      initialTau: 0.8786,
+      currentEdge: 'right'
+    });
 
     // Scroll state
     this.scrollOffset = 0;
@@ -78,8 +94,120 @@ export class BoardButtonsManager {
   renderConcentricCircles() {
     this.concentricCircles = new BoardConcentricCircles({
       container: this.container,
-      emptyMode: this.emptyMode
+      emptyMode: this.emptyMode,
+      onSelectionChange: (selectedPersonId) => {
+        if (!this.isVisiting) {
+          this.updateEditButtonMode(Boolean(selectedPersonId));
+        }
+      }
     });
+  }
+
+  getSavedBoardNames() {
+    try {
+      const raw = localStorage.getItem('nopitac_saved_boards');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  isBoardSaved() {
+    const key = (this.username || '').trim().toLowerCase();
+    if (!key) return false;
+    return this.getSavedBoardNames().includes(key);
+  }
+
+  updateEditButtonMode(hasSelection) {
+    const editBtn = this.buttons.find((b) => b.id === 'edit');
+    if (!editBtn) return;
+    const nextLabel = hasSelection ? 'edit info' : 'edit board';
+    const nextLength = hasSelection ? 115.3034 : 134.599;
+    if (editBtn.label === nextLabel && editBtn.length === nextLength) return;
+    editBtn.label = nextLabel;
+    editBtn.length = nextLength;
+    this.update();
+  }
+
+  handleEditButtonClick(e) {
+    if (e) e.stopPropagation();
+    if (!this.concentricCircles || !this.addPersonComponent) return;
+    const selectedId = this.concentricCircles.selectedPersonId;
+    if (!selectedId) {
+      // 'edit board' clicked when nothing is selected (reserved for future instructions)
+      return;
+    }
+    const person = this.concentricCircles.people.get(selectedId);
+    if (!person) return;
+    const domainColor = this.concentricCircles.getDomainColor(person.domain);
+    this.addPersonComponent.openForEdit({
+      ...person,
+      domainColor
+    });
+  }
+
+  handleSaveBoardClick(e) {
+    if (e) e.stopPropagation();
+    const key = (this.username || '').trim().toLowerCase();
+    if (!key) return;
+
+    const saved = this.getSavedBoardNames();
+    const idx = saved.indexOf(key);
+    let nowSaved = false;
+    if (idx >= 0) {
+      saved.splice(idx, 1);
+      nowSaved = false;
+    } else {
+      saved.push(key);
+      nowSaved = true;
+    }
+
+    try {
+      localStorage.setItem('nopitac_saved_boards', JSON.stringify(saved));
+      // Save profile metadata snapshot so visited boards appear properly in Community -> Saved Boards
+      const profilesRaw = localStorage.getItem('nopitac_saved_board_profiles');
+      const profiles = profilesRaw ? JSON.parse(profilesRaw) : {};
+      if (nowSaved) {
+        const domainCounts = [];
+        const seenDomains = new Set();
+        if (this.concentricCircles && this.concentricCircles.people) {
+          for (const p of this.concentricCircles.people.values()) {
+            const dn = (p.domain || 'artists').trim().toLowerCase();
+            if (!seenDomains.has(dn)) {
+              seenDomains.add(dn);
+              domainCounts.push({
+                name: dn,
+                color: this.concentricCircles.getDomainColor(dn)
+              });
+            }
+          }
+        }
+        profiles[key] = {
+          name: key,
+          composition: 'circle',
+          domains: domainCounts.length > 0 ? domainCounts : [{ name: 'artists', color: '#27ff83' }],
+          peopleCount: this.concentricCircles?.people?.size || 0
+        };
+      } else {
+        delete profiles[key];
+      }
+      localStorage.setItem('nopitac_saved_board_profiles', JSON.stringify(profiles));
+    } catch (err) {
+      console.warn('Could not persist saved board:', err);
+    }
+
+    const saveBtn = this.buttons.find((b) => b.id === 'save-board');
+    if (saveBtn) {
+      saveBtn.label = nowSaved ? 'board saved' : 'save board';
+      saveBtn.length = nowSaved ? 155.3 : 142.8268;
+      this.update();
+    }
+
+    if (this.authUserId) {
+      nopitacService.setSavedBoard(this.authUserId, key, nowSaved);
+    }
   }
 
   measureDimensions() {
@@ -166,9 +294,10 @@ export class BoardButtonsManager {
 
       const logoutBtn = badge.querySelector('#boardLogoutBtn');
       if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
+        logoutBtn.addEventListener('click', async (e) => {
           e.preventDefault();
           e.stopPropagation();
+          await nopitacService.signOut();
           localStorage.removeItem('nopitac_user');
           window.location.replace('/');
         });
@@ -186,43 +315,62 @@ export class BoardButtonsManager {
   }
 
   renderButtons() {
-    // 1. Initialize AddPersonButton component (handles Top, Left, and Right edges)
-    this.addPersonComponent = new AddPersonButton({
-      container: this.container,
-      edge: 'top',
-      emptyMode: this.emptyMode,
-      onDone: (data) => {
-        console.log('Add person submitted from Board UI:', data);
-        if (data && data.fullName && this.concentricCircles) {
-          this.concentricCircles.addPerson(data);
-        }
-      },
-      onAddDomain: (newDomain) => {
-        if (newDomain && newDomain.name && newDomain.color) {
-          if (this.concentricCircles) {
-            this.concentricCircles.registerDomainColor(newDomain.name, newDomain.color);
+    // 1. Initialize AddPersonButton component on own board (hidden when visiting someone else's board)
+    if (!this.isVisiting) {
+      this.addPersonComponent = new AddPersonButton({
+        container: this.container,
+        edge: 'top',
+        emptyMode: this.emptyMode,
+        onDone: (data) => {
+          console.log('Add/Edit person submitted from Board UI:', data);
+          if (!data || !data.fullName || !this.concentricCircles) return;
+          if (data.editingPersonId) {
+            this.concentricCircles.updatePerson(data.editingPersonId, data);
+          } else {
+            this.concentricCircles.addPerson(data);
           }
-          if (this.sortComponent) {
-            this.sortComponent.addDomain(newDomain);
+          if (this.authUserId) {
+            nopitacService.upsertPerson(this.authUserId, data, data.editingPersonId);
+          }
+        },
+        onAddDomain: (newDomain) => {
+          if (newDomain && newDomain.name && newDomain.color) {
+            if (this.concentricCircles) {
+              this.concentricCircles.registerDomainColor(newDomain.name, newDomain.color);
+            }
+            if (this.sortComponent) {
+              this.sortComponent.addDomain(newDomain);
+            }
+            if (this.authUserId) {
+              nopitacService.saveDomain(this.authUserId, newDomain);
+            }
           }
         }
-      }
-    });
+      });
+    } else {
+      this.addPersonComponent = null;
+    }
 
     // 2. Initialize SortButton component (handles Top, Left, and Right edges)
     this.sortComponent = new SortButton({
       container: this.container,
       edge: 'right',
       emptyMode: this.emptyMode,
+      onBeforeOpen: () => {
+        if (this.concentricCircles) {
+          this.concentricCircles.deselectPerson();
+        }
+      },
       onSortChange: (data) => {
         console.log('Sort options changed from Board UI:', data);
         if (this.concentricCircles) {
+          this.concentricCircles.deselectPerson();
           this.concentricCircles.applySortAndFilter(data);
         }
       }
     });
 
-    // 3. Create DOM wrapper elements for circulating contracted buttons ('search')
+    // 3. Create DOM wrapper elements for circulating contracted buttons ('edit' or 'save-board')
     this.buttons.forEach((btn) => {
       if (btn.id === 'add-person' || btn.id === 'sort') return;
       const el = document.createElement('div');
@@ -230,6 +378,25 @@ export class BoardButtonsManager {
       el.id = `boardBtn_${btn.id.replace('-', '_')}`;
       el.setAttribute('data-btn-id', btn.id);
       el.setAttribute('title', btn.label);
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+
+      const handleClick = (e) => {
+        if (btn.id === 'edit') {
+          this.handleEditButtonClick(e);
+        } else if (btn.id === 'save-board') {
+          this.handleSaveBoardClick(e);
+        }
+      };
+
+      el.addEventListener('click', handleClick);
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick(e);
+        }
+      });
+
       this.container.appendChild(el);
       this.elements[btn.id] = el;
     });
@@ -510,9 +677,11 @@ export class BoardButtonsManager {
     const el = this.elements[btn.id];
     if (!el) return;
 
-    if (isEdgeChange || !el.innerHTML) {
+    if (isEdgeChange || !el.innerHTML || el.dataset.renderedLabel !== btn.label) {
       el.innerHTML = this.getButtonSvg(pos.edge, btn.length, btn.label, btn.weight);
       el.className = `board-moving-btn board-btn-${btn.id} is-${pos.edge}`;
+      el.dataset.renderedLabel = btn.label;
+      el.setAttribute('title', btn.label);
     }
 
     if (pos.edge === 'top') {

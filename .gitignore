@@ -21,6 +21,11 @@ yarn-error.log*
 *.sw?
 .vite/
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
 # Temporary test artifacts
 test_*.png
 test_*.svg

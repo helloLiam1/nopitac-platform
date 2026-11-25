@@ -1,11 +1,11 @@
 /**
  * LandingApp
  * Controls the After Sign-Up / Post-Login screen:
- *  - Centers the exact vector statement card from after sign up.svg
+ *  - Centers the exact vector statement card from after sign in .svg (369.2594px)
  *  - Circulates the two edge buttons around the screen on scroll:
- *      1. "create your own \n nopitac board" (button-04.svg)
- *      2. "explore boards by \n other users " (button-05.svg)
- *  - Text styling: Helvetica Neue Bold 28px, -25 kerning (-0.025em), line gap 28px
+ *      1. "create your own \n nopitac board"
+ *      2. "explore boards by \n other users "
+ *  - Text styling: Helvetica Neue Bold 21px, -25 kerning (-0.025em), line gap 21.5898px
  *  - Direct 1:1 responsiveness, endless modulo scrolling along Left -> Top -> Right edges
  */
 
@@ -16,21 +16,29 @@ export class LandingApp {
 
     // Read active accent color (from URL query param or localStorage)
     const urlParams = new URLSearchParams(window.location.search);
-    this.accentColor = urlParams.get('color') || localStorage.getItem('nopitac_accent_color') || '#6a76ff';
+    const paramColor = urlParams.get('color');
+    this.accentColor = paramColor || localStorage.getItem('nopitac_accent_color') || '#6a76ff';
+    try {
+      if (paramColor) {
+        localStorage.setItem('nopitac_accent_color', this.accentColor);
+      }
+    } catch (e) {}
+
+    document.documentElement.style.setProperty('--landing-accent-color', this.accentColor);
     if (this.viewport) {
       this.viewport.style.setProperty('--landing-accent-color', this.accentColor);
     }
 
-    // Button definitions matching button-04.svg and button-05.svg
+    // Button definitions matching after sign in .svg (248.5372 x 75.7708 inner span + stroke)
     this.buttonConfigs = [
       {
         id: 'create-board',
         line1: 'create your own',
         line2: 'nopitac board',
-        length: 312.8205,
-        breadth: 95.7589,
-        // In 1440x900 artboard: Top edge at x = 163.8782px
-        initialTau: 0.3263,
+        length: 250.5372,
+        breadth: 76.7708,
+        // In 1440x900 artboard: Top edge at x = 275.1951px (stroke center)
+        initialTau: 0.3712,
         currentEdge: 'top',
         action: () => {
           try {
@@ -43,10 +51,10 @@ export class LandingApp {
         id: 'explore-boards',
         line1: 'explore boards by',
         line2: 'other users ',
-        length: 312.8205,
-        breadth: 95.7589,
-        // In 1440x900 artboard: Right edge at y = 495.0884px
-        initialTau: 0.9600,
+        length: 250.5372,
+        breadth: 76.7708,
+        // In 1440x900 artboard: Right edge at y = 486.0534px (stroke center)
+        initialTau: 0.9339,
         currentEdge: 'right',
         action: () => {
           window.location.replace('/community.html');
@@ -74,7 +82,7 @@ export class LandingApp {
     this.viewportHeight = window.innerHeight || 900;
 
     // Track setup matching BoardButtonsManager
-    this.refLength = 312.8205;
+    this.refLength = 250.5372;
     this.segLeft = Math.max(100, this.viewportHeight - this.refLength);
     this.segTop = Math.max(100, this.viewportWidth - this.refLength);
     this.segRight = Math.max(100, this.viewportHeight - this.refLength);
@@ -205,40 +213,40 @@ export class LandingApp {
   }
 
   getButtonSvg(edge, line1, line2) {
-    const fontStyle = "font-family: 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.025em;";
+    const fontStyle = "font-family: 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.025em;";
 
     if (edge === 'top') {
       return `
-        <svg xmlns="http://www.w3.org/2000/svg" width="312.8205" height="95.7589" viewBox="0 0 312.8205 95.7589">
-          <polyline points="1 0 1 94.7589 311.8205 94.7589 311.8205 0" style="fill: #ffffff;"/>
-          <text transform="translate(8.4469 41.7206)" style="${fontStyle}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="250.5372" height="76.7708" viewBox="0 0 250.5372 76.7708">
+          <polyline points="1 0 1 75.7708 249.5372 75.7708 249.5372 0" style="fill: #ffffff;"/>
+          <text transform="translate(6.9583 33.3609)" style="${fontStyle}">
             <tspan x="0" y="0">${line1}</tspan>
-            <tspan x="0" y="27">${line2}</tspan>
+            <tspan x="0" y="21.5898">${line2}</tspan>
           </text>
-          <polyline points="1 0 1 94.7589 311.8205 94.7589 311.8205 46.2174" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 2px;"/>
+          <polyline points="1 0 1 75.7708 249.5372 75.7708 249.5372 36.9562" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 2px;"/>
         </svg>
       `;
     } else if (edge === 'right') {
       return `
-        <svg xmlns="http://www.w3.org/2000/svg" width="95.7589" height="312.8205" viewBox="0 0 95.7589 312.8205">
-          <polyline points="94.7589 0 0 0 0 311.8205 94.7589 311.8205" style="fill: #ffffff;"/>
-          <text transform="translate(53.0419 7.4482) rotate(90)" style="${fontStyle}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="76.7708" height="250.5372" viewBox="0 0 76.7708 250.5372">
+          <polyline points="76.7708 1 1 1 1 249.5372 76.7708 249.5372" style="fill: #ffffff;"/>
+          <text transform="translate(43.4129 6.9558) rotate(90)" style="${fontStyle}">
             <tspan x="0" y="0">${line1}</tspan>
-            <tspan x="0" y="27">${line2}</tspan>
+            <tspan x="0" y="21.5898">${line2}</tspan>
           </text>
-          <polyline points="94.7589 0 0 0 0 311.8205 46.2174 311.8205" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 2px;"/>
+          <polyline points="76.7708 1 1 1 1 249.5372 39.8146 249.5372" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 2px;"/>
         </svg>
       `;
     } else {
       // Left edge
       return `
-        <svg xmlns="http://www.w3.org/2000/svg" width="95.7589" height="312.8205" viewBox="0 0 95.7589 312.8205">
-          <polyline points="0 311.8205 94.7589 311.8205 94.7589 0 0 0" style="fill: #ffffff;"/>
-          <text transform="translate(42.717 304.3723) rotate(-90)" style="${fontStyle}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="76.7708" height="250.5372" viewBox="0 0 76.7708 250.5372">
+          <polyline points="0 249.5372 75.7708 249.5372 75.7708 1 0 1" style="fill: #ffffff;"/>
+          <text transform="translate(33.3579 243.5814) rotate(-90)" style="${fontStyle}">
             <tspan x="0" y="0">${line1}</tspan>
-            <tspan x="0" y="27">${line2}</tspan>
+            <tspan x="0" y="21.5898">${line2}</tspan>
           </text>
-          <polyline points="0 311.8205 94.7589 311.8205 94.7589 0 46.2174 0" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 2px;"/>
+          <polyline points="0 249.5372 75.7708 249.5372 75.7708 1 36.9562 1" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 2px;"/>
         </svg>
       `;
     }

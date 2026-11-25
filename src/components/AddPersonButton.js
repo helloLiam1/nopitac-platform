@@ -41,6 +41,8 @@ export class AddPersonButton {
     this.emptyMode = Boolean(options.emptyMode);
     this.onDone = options.onDone || null;
     this.onAddDomain = options.onAddDomain || null;
+    this.editingPersonId = null;
+    this.isEditMode = false;
 
     // Shared form data state across edges
     this.formData = {
@@ -643,6 +645,9 @@ export class AddPersonButton {
       this._hasGlobalClick = true;
       document.addEventListener('click', (e) => {
         if (this.isExpanded && this.widget && !this.widget.contains(e.target)) {
+          if (e.target.closest('.board-btn-edit')) {
+            return;
+          }
           if (this.domainPanel && this.domainPanel.widget && this.domainPanel.widget.contains(e.target)) {
             return;
           }
@@ -763,6 +768,33 @@ export class AddPersonButton {
     this._animFrameId = requestAnimationFrame(tick);
   }
 
+  /**
+   * Opens AddPersonButton pre-populated with an existing person's saved info for editing.
+   */
+  openForEdit(person) {
+    if (!person) return;
+    this.editingPersonId = person.id || (person.fullName || '').trim().toLowerCase();
+    this.isEditMode = true;
+
+    const existingPhotoHref = person.photo?.imageHref || (Array.isArray(person.photos) ? person.photos[0] : null) || null;
+    this.formData = {
+      fullName: person.fullName || '',
+      domain: person.domain || '',
+      domainColor: person.domainColor || null,
+      year: person.year || '',
+      whyCool: person.description || person.whyCool || '',
+      place: person.place || '',
+      links: person.links || '',
+      photos: [existingPhotoHref],
+      photo: person.photo ? { ...person.photo } : (existingPhotoHref ? { imageHref: existingPhotoHref, theme: 'dark' } : null)
+    };
+
+    this.syncAllInputs();
+    if (!this.isExpanded) {
+      this.open();
+    }
+  }
+
   open() {
     if (this.isExpanded) return;
     this.isExpanded = true;
@@ -802,7 +834,10 @@ export class AddPersonButton {
 
   close(immediate = false) {
     if (!this.isExpanded) return;
+    const wasEditMode = this.isEditMode;
     this.isExpanded = false;
+    this.editingPersonId = null;
+    this.isEditMode = false;
     if (this.domainPanel) {
       this.domainPanel.close();
     }
@@ -811,6 +846,10 @@ export class AddPersonButton {
     }
     this.widget.classList.remove('is-expanded');
     this.widget.setAttribute('aria-expanded', 'false');
+
+    if (wasEditMode) {
+      this.clearForm();
+    }
 
     if (immediate) {
       if (this._animFrameId) {
@@ -912,6 +951,7 @@ export class AddPersonButton {
     }
 
     const data = {
+      editingPersonId: this.editingPersonId,
       fullName: this.inputFullName ? this.inputFullName.value.trim() : '',
       domain: domainVal,
       domainColor: domainColorVal,
@@ -924,6 +964,9 @@ export class AddPersonButton {
       dateAdded: now,
       dateAddedISO: new Date(now).toISOString()
     };
+
+    this.editingPersonId = null;
+    this.isEditMode = false;
 
     if (typeof this.onDone === 'function') {
       this.onDone(data);

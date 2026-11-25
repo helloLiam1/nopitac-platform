@@ -59,14 +59,27 @@ html, body {
   background-color: var(--bg-color);
 }
 
+/* Screen-reader accessible heading */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ==========================================================================
    Fixed Top Header ("explore community")
-   Exact match to community page no guides.svg:
-   x = 510.43, y = 103.64, 48px bold, 3px outer bracket
+   Exact match to button__community.svg & commnuity new.svg:
+   width: 472.6903px, height: 65.585px, top: 62.5px, 48px bold, 3px bracket
    ========================================================================== */
 .community-header {
   position: absolute;
-  top: 70px;
+  top: 62.5px;
   left: 0;
   width: 100%;
   display: flex;
@@ -79,33 +92,17 @@ html, body {
 
 .community-header-bracket-wrap {
   position: relative;
-  width: 472px;
-  height: 60px;
+  width: 472.6903px;
+  height: 65.585px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.community-title {
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-bold);
-  font-size: 48px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: #000000;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-  transform: translateY(-8px);
-}
-
 .community-header-svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  display: block;
+  width: 472.6903px;
+  height: 65.585px;
   overflow: visible;
   pointer-events: none;
 }
@@ -181,7 +178,7 @@ html, body {
 }
 
 /* --------------------------------------------------------------------------
-   Container 1: Icon and Name
+   Container 1: Icon and Name (CONSTANT width across all viewports/users)
    Icon (circle / square / lines) + Nopitac Helvetica 36px name
    Clickable -> routes to /board.html?user=<name>&mode=empty
    -------------------------------------------------------------------------- */
@@ -189,12 +186,15 @@ html, body {
   position: relative;
   display: flex;
   align-items: center;
-  flex: 0 0 auto;
+  flex: 0 0 372px;
+  width: 372px;
   height: 100%;
-  padding-left: 20px;
-  margin-right: 32px;
+  padding-left: 24px;
+  padding-right: 16px;
+  margin-right: 0;
   cursor: pointer;
   z-index: 10;
+  overflow: hidden;
   transition: opacity 0.15s ease;
 }
 
@@ -229,20 +229,22 @@ html, body {
 }
 
 /* --------------------------------------------------------------------------
-   Container 2: Domains List
-   DomainType left-mode chips (28pt Helvetica Neue Regular, -25 tracking)
-   Separated by 16.92px gap (matching no-guides Illustrator spec)
+   Container 2: Domains List (FLEXIBLE width, scales with screen size)
+   DomainType left-mode chips (28pt Helvetica Neue Regular, -25 tracking, 1px line)
+   Separated by 16.92px gap, horizontally scrollable when domains exceed container
    -------------------------------------------------------------------------- */
 .community-col-domains {
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1 1 auto;
+  flex: 1 1 0%;
+  min-width: 0;
   padding-left: 0;
-  padding-right: 40px;
+  padding-right: 16px;
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
   z-index: 10;
 }
@@ -255,18 +257,14 @@ html, body {
   display: flex;
   align-items: center;
   gap: 16.92px;
+  width: max-content;
 }
 
 .community-domain-chip {
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
   cursor: default;
-  transition: transform 0.15s ease, filter 0.15s ease;
-}
-
-.community-domain-chip:hover {
-  transform: translateY(-1px);
-  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.12));
 }
 
 .community-domain-chip svg {
@@ -275,7 +273,7 @@ html, body {
 }
 
 /* --------------------------------------------------------------------------
-   Container 3: Number of People
+   Container 3: Number of People (CONSTANT width across all viewports/users)
    18pt Helvetica Neue Bold (-25 kerning)
    Positioned near the bottom-right inside the bounding wing
    -------------------------------------------------------------------------- */
@@ -284,6 +282,7 @@ html, body {
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
+  flex: 0 0 60px;
   width: 60px;
   height: 100%;
   padding-right: 18px;
@@ -299,11 +298,6 @@ html, body {
   letter-spacing: -0.025em;
   color: #000000;
   line-height: 1;
-  transition: transform 0.15s ease;
-}
-
-.community-col-count:hover .community-count-text {
-  transform: scale(1.08);
 }
 
 /* ==========================================================================
@@ -363,10 +357,26 @@ html, body {
   letter-spacing: -0.025em;
 }
 
+.community-platform-count-group {
+  pointer-events: all;
+  cursor: default;
+}
+
+.community-empty-state {
+  width: 100%;
+  padding: 48px 0;
+  text-align: center;
+  font-family: var(--font-bold);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #666666;
+}
+
 /* ==========================================================================
-   Revolving "your board" Edge Button
-   Exact match to button__your board.svg:
-   width: 198.4px, height: 38.9px, stroke: 1.5px, Helvetica Neue Bold 24px
+   Revolving Edge Buttons ("to your board" & "to saved boards")
+   Exact match to button__your board.svg & button__saved boards.svg:
+   width: 182.74px / 208.11px, height: 32.23px, stroke: 1.5px, Helvetica Neue Bold 21px
    Bounded at y = 800.82px (never touches or crosses bottom edge)
    ========================================================================== */
 .community-revolving-btn {

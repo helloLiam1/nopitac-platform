@@ -39,10 +39,10 @@ export function hasMiddleDescender(chars) {
 }
 
 /**
- * Strips the upper horizontal underline stub (located at relY ≈ 5.225) from custom glyph SVG markup.
- * Used when extended underline is active so that only the single lower underline is rendered.
+ * Strips the horizontal underline stub (located at targetRelY, default UNDERLINE_Y ≈ 5.225)
+ * from custom glyph SVG markup so extended/frame underlines render cleanly without overlap.
  */
-export function stripUnderlineStub(innerSvg, baseline) {
+export function stripUnderlineStub(innerSvg, baseline, targetRelY = UNDERLINE_Y) {
   if (!innerSvg) return '';
 
   return innerSvg.replace(/<(rect|path|polygon)\s+([^>]+?)\/?>/gs, (fullTag, tagName, attrs) => {
@@ -53,8 +53,8 @@ export function stripUnderlineStub(innerSvg, baseline) {
       const trans = attrs.match(/transform=\"([^\"]+)\"/)?.[1] || '';
       const relY = y - baseline;
 
-      if (!trans) {
-        if (Math.abs(relY - UNDERLINE_Y) < 0.4 && Math.abs(h - UNDERLINE_HEIGHT) < 0.2 && w > 5) {
+      if (!trans || trans.includes('rotate(180)')) {
+        if (Math.abs(relY - targetRelY) < 0.4 && Math.abs(h - UNDERLINE_HEIGHT) < 0.2 && w > 5) {
           return ''; // Strip horizontal underline rect
         }
       } else if (trans.includes('rotate(90)')) {
@@ -70,7 +70,7 @@ export function stripUnderlineStub(innerSvg, baseline) {
         if (coords) {
           const y = parseFloat(coords[2]);
           const relY = y - baseline;
-          if (Math.abs(relY - UNDERLINE_Y) < 0.4) {
+          if (Math.abs(relY - targetRelY) < 0.4) {
             return ''; // Strip path underline rect
           }
         }

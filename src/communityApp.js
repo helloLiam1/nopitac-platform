@@ -19,6 +19,7 @@
 
 import { NopitacRenderer, FONT_SIZE } from './engine/nopitacRenderer.js';
 import DomainType from './engine/domainType.js';
+import { nopitacService } from './lib/nopitacService.js';
 
 const COMMUNITY_USERS = [
   {
@@ -40,22 +41,43 @@ export class CommunityApp {
     this.listContainer = document.getElementById('communityList');
     this.scrollContainer = document.getElementById('communityScrollContainer');
     this.tooltipEl = document.getElementById('communityTooltip');
-    this.btnElement = null;
+    this.btnElements = {};
+    this.showingSavedOnly = false;
 
     this.nameRenderer = new NopitacRenderer(null);
 
-    // Track state for revolving "your board" button
+    // Track state for revolving edge buttons ("to your board" & "to saved boards")
     this.scrollOffset = 0;
     this.targetScrollOffset = 0;
     this.isTicking = false;
-    this.buttonConfig = {
-      id: 'your-board',
-      label: 'your board',
-      length: 198.3979,
-      breadth: 38.9074,
-      initialTau: 0, // Computed dynamically based on 179.23px on top edge
-      currentEdge: 'top'
-    };
+    this.buttonConfigs = [
+      {
+        id: 'your-board',
+        label: 'to your board',
+        length: 182.7375,
+        breadth: 32.231,
+        // Top edge at x = 184.0646px (stroke center 184.8146 in commnuity new.svg)
+        edge: 'top',
+        edgeFrac: 184.0646 / (1440 - 182.7375),
+        currentEdge: 'top',
+        action: () => {
+          window.location.href = '/board.html';
+        }
+      },
+      {
+        id: 'saved-boards',
+        label: 'to saved boards',
+        length: 208.1066,
+        breadth: 32.231,
+        // Right edge at y = 60.4449px (stroke center 61.1949 in commnuity new.svg)
+        edge: 'right',
+        edgeFrac: 60.4449 / (800.8216 - 208.1066),
+        currentEdge: 'right',
+        action: () => {
+          this.toggleSavedBoardsView();
+        }
+      }
+    ];
 
     // Tooltip dwell timer
     this.tooltipTimer = null;
@@ -64,13 +86,47 @@ export class CommunityApp {
     this.init();
   }
 
-  init() {
+  async init() {
+    this.communityUsers = [...COMMUNITY_USERS];
+    this.remoteSavedNames = null;
+
     this.measureDimensions();
+    this.updatePlatformUserCount();
     this.renderCommunityUsers();
-    this.createRevolvingButton();
+    this.createRevolvingButtons();
     this.setupUserSignature();
     this.bindEvents();
-    this.updateButton();
+    this.updateButtons();
+
+    // Hydrate registered users & saved boards from Supabase
+    try {
+      const [dbUsers, sbUser] = await Promise.all([
+        nopitacService.fetchCommunityUsers(),
+        nopitacService.getCurrentUser()
+      ]);
+      if (Array.isArray(dbUsers) && dbUsers.length > 0) {
+        const merged = [...COMMUNITY_USERS];
+        const existing = new Set(merged.map((u) => u.name.toLowerCase()));
+        dbUsers.forEach((u) => {
+          if (!existing.has(u.name.toLowerCase())) {
+            merged.push(u);
+          }
+        });
+        this.communityUsers = merged;
+      }
+      if (sbUser?.id) {
+        this.remoteSavedNames = await nopitacService.getSavedBoardNames(sbUser.id);
+      }
+      this.updatePlatformUserCount();
+      this.renderCommunityUsers();
+    } catch (e) {}
+  }
+
+  updatePlatformUserCount() {
+    const countEl = document.getElementById('communityPlatformCount');
+    if (countEl) {
+      countEl.textContent = String((this.communityUsers || COMMUNITY_USERS).length);
+    }
   }
 
   measureDimensions() {
@@ -80,11 +136,11 @@ export class CommunityApp {
     this.bottomBarY = Math.max(300, this.viewportHeight - 99.1784);
     this.usableHeight = this.bottomBarY;
 
-    // Track segments: Left (up) -> Top (right) -> Right (down)
-    const L = this.buttonConfig.length;
-    this.segLeft = Math.max(100, this.usableHeight - L);
-    this.segTop = Math.max(100, this.viewportWidth - L);
-    this.segRight = Math.max(100, this.usableHeight - L);
+    // Shared reference track segments so both buttons revolve at identical speed without drifting
+    this.refLength = 208.1066;
+    this.segLeft = Math.max(100, this.usableHeight - this.refLength);
+    this.segTop = Math.max(100, this.viewportWidth - this.refLength);
+    this.segRight = Math.max(100, this.usableHeight - this.refLength);
     this.trackLength = this.segLeft + this.segTop + this.segRight;
   }
 
@@ -134,10 +190,11 @@ export class CommunityApp {
     const textColor = domain.textColor || '#030021';
     const bgColor = domain.color;
 
-    // Use DomainType engine to compute exact metrics
+    // Use DomainType engine to compute exact metrics with 1px inward outline
     const comp = DomainType.compute(domain.name, {
       mode: 'left',
       fontSize: fontSize,
+      outlineWidth: 1,
       bgColor: bgColor,
       textColor: textColor,
       fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif"
@@ -153,16 +210,62 @@ export class CommunityApp {
         <text style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: ${fontSize}px; font-weight: 400; letter-spacing: -0.025em; fill: ${textColor};">
           ${comp.lines.map((l) => `<tspan x="${l.x.toFixed(2)}" y="${l.baselineY.toFixed(2)}">${l.text}</tspan>`).join('')}
         </text>
-        <path d="${outlineD}" fill="none" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10" />
+        <path d="${outlineD}" fill="none" stroke="#000000" stroke-width="1" stroke-miterlimit="10" />
       </svg>
     `;
+  }
+
+  getSavedBoardNames() {
+    try {
+      const raw = localStorage.getItem('nopitac_saved_boards');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  getSavedBoardProfiles() {
+    try {
+      const raw = localStorage.getItem('nopitac_saved_board_profiles');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) {}
+    return {};
+  }
+
+  toggleSavedBoardsView() {
+    this.showingSavedOnly = !this.showingSavedOnly;
+    this.renderCommunityUsers();
   }
 
   renderCommunityUsers() {
     if (!this.listContainer) return;
     this.listContainer.innerHTML = '';
 
-    COMMUNITY_USERS.forEach((user) => {
+    const allUsers = this.communityUsers || COMMUNITY_USERS;
+    const savedNames = this.remoteSavedNames || this.getSavedBoardNames();
+    const savedProfiles = this.getSavedBoardProfiles();
+    let visibleUsers = allUsers;
+    if (this.showingSavedOnly) {
+      const baseMatched = allUsers.filter((u) => savedNames.includes(u.name.toLowerCase()));
+      const matchedSet = new Set(baseMatched.map((u) => u.name.toLowerCase()));
+      const extraSaved = savedNames
+        .filter((name) => !matchedSet.has(name) && savedProfiles[name])
+        .map((name) => savedProfiles[name]);
+      visibleUsers = [...baseMatched, ...extraSaved];
+    }
+
+    if (visibleUsers.length === 0) {
+      this.listContainer.innerHTML = '<div class="community-empty-state">no saved boards yet</div>';
+      this.bindTooltips();
+      return;
+    }
+
+    visibleUsers.forEach((user) => {
       const row = document.createElement('div');
       row.className = 'community-row-box';
       row.setAttribute('data-username', user.name);
@@ -193,9 +296,8 @@ export class CommunityApp {
       const domainsHtml = user.domains
         .map((d) => {
           const chipSvg = this.getDomainChipSvg(d);
-          const cleanName = d.name.replace(/\n+/g, ' ');
           return `
-            <div class="community-domain-chip" data-tooltip="domain: ${cleanName}">
+            <div class="community-domain-chip" data-tooltip="people in their board">
               ${chipSvg}
             </div>
           `;
@@ -217,7 +319,7 @@ export class CommunityApp {
         </div>
 
         <!-- Container 3: Number of People -->
-        <div class="community-col-count" data-tooltip="${user.peopleCount} people in board">
+        <div class="community-col-count" data-tooltip="${user.peopleCount} people in their board">
           <span class="community-count-text">${user.peopleCount}</span>
         </div>
       `;
@@ -244,29 +346,30 @@ export class CommunityApp {
     this.bindTooltips();
   }
 
-  createRevolvingButton() {
-    const cfg = this.buttonConfig;
-    const btn = document.createElement('div');
-    btn.className = `community-revolving-btn btn-${cfg.id}`;
-    btn.id = `communityBtn_${cfg.id}`;
-    btn.setAttribute('role', 'button');
-    btn.setAttribute('tabindex', '0');
-    btn.setAttribute('aria-label', cfg.label);
+  createRevolvingButtons() {
+    this.buttonConfigs.forEach((cfg) => {
+      const btn = document.createElement('div');
+      btn.className = `community-revolving-btn btn-${cfg.id}`;
+      btn.id = `communityBtn_${cfg.id}`;
+      btn.setAttribute('role', 'button');
+      btn.setAttribute('tabindex', '0');
+      btn.setAttribute('aria-label', cfg.label);
 
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.location.href = '/board.html';
-    });
-
-    btn.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+      btn.addEventListener('click', (e) => {
         e.preventDefault();
-        window.location.href = '/board.html';
-      }
-    });
+        cfg.action();
+      });
 
-    this.viewport.appendChild(btn);
-    this.btnElement = btn;
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          cfg.action();
+        }
+      });
+
+      this.viewport.appendChild(btn);
+      this.btnElements[cfg.id] = btn;
+    });
   }
 
   setupUserSignature() {
@@ -327,7 +430,7 @@ export class CommunityApp {
     // Window resize
     window.addEventListener('resize', () => {
       this.measureDimensions();
-      this.updateButton();
+      this.updateButtons();
     });
 
     // Track mouse coordinates for tooltip
@@ -343,6 +446,9 @@ export class CommunityApp {
   bindTooltips() {
     const tooltipTargets = document.querySelectorAll('[data-tooltip]');
     tooltipTargets.forEach((target) => {
+      if (target.dataset.tooltipBound === '1') return;
+      target.dataset.tooltipBound = '1';
+
       target.addEventListener('mouseenter', (e) => {
         const text = target.getAttribute('data-tooltip');
         if (!text) return;
@@ -409,11 +515,11 @@ export class CommunityApp {
     const diff = this.targetScrollOffset - this.scrollOffset;
     if (Math.abs(diff) > 0.1) {
       this.scrollOffset += diff * 0.45;
-      this.updateButton();
+      this.updateButtons();
       requestAnimationFrame(() => this.tick());
     } else {
       this.scrollOffset = this.targetScrollOffset;
-      this.updateButton();
+      this.updateButtons();
       this.isTicking = false;
     }
   }
@@ -448,76 +554,88 @@ export class CommunityApp {
     }
   }
 
-  getButtonSvg(edge) {
-    const fontStyle = "font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.025em;";
+  getButtonSvg(edge, cfg) {
+    const fontStyle = "font-family: 'Helvetica Neue Bold', 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.025em;";
+    const L = cfg.length;
+    const B = cfg.breadth; // 32.231
 
     if (edge === 'top') {
       return `
-        <svg xmlns="http://www.w3.org/2000/svg" width="198.3979" height="38.9074" viewBox="0 0 198.3979 38.9074">
-          <polyline points="197.6479 0 197.6479 38.1574 .75 38.1574 .75 0" style="fill: #ffffff;"/>
-          <text transform="translate(9.9202 27.028)" style="${fontStyle}">
-            <tspan x="0" y="0">your board</tspan>
+        <svg xmlns="http://www.w3.org/2000/svg" width="${L}" height="${B}" viewBox="0 0 ${L} ${B}">
+          <polyline points="${(L - 0.75).toFixed(4)} 0 ${(L - 0.75).toFixed(4)} ${(B - 0.75).toFixed(4)} 0.75 ${(B - 0.75).toFixed(4)} 0.75 0" style="fill: #ffffff;"/>
+          <text transform="translate(7.3433 21.5036)" style="${fontStyle}">
+            <tspan x="0" y="0">${cfg.label}</tspan>
           </text>
-          <polyline points="197.6479 14.3913 197.6479 38.1574 .75 38.1574 .75 0" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 1.5px;"/>
+          <polyline points="${(L - 0.75).toFixed(4)} 17.2203 ${(L - 0.75).toFixed(4)} ${(B - 0.75).toFixed(4)} 0.75 ${(B - 0.75).toFixed(4)} 0.75 0" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 1.5px;"/>
         </svg>
       `;
     } else if (edge === 'right') {
       return `
-        <svg xmlns="http://www.w3.org/2000/svg" width="38.9074" height="198.3979" viewBox="0 0 38.9074 198.3979">
-          <polyline points="38.9074 0 0 0 0 197.6479 38.9074 197.6479" style="fill: #ffffff;"/>
-          <text transform="translate(11.8794 9.9202) rotate(90)" style="${fontStyle}">
-            <tspan x="0" y="0">your board</tspan>
+        <svg xmlns="http://www.w3.org/2000/svg" width="${B}" height="${L}" viewBox="0 0 ${B} ${L}">
+          <polyline points="${B} 0.75 0.75 0.75 0.75 ${(L - 0.75).toFixed(4)} ${B} ${(L - 0.75).toFixed(4)}" style="fill: #ffffff;"/>
+          <text transform="translate(10.7274 7.3433) rotate(90)" style="${fontStyle}">
+            <tspan x="0" y="0">${cfg.label}</tspan>
           </text>
-          <polyline points="38.9074 0.75 0.75 0.75 0.75 197.6479 24.5 197.6479" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 1.5px;"/>
+          <polyline points="${B} 0.75 0.75 0.75 0.75 ${(L - 0.75).toFixed(4)} 15.0107 ${(L - 0.75).toFixed(4)}" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 1.5px;"/>
         </svg>
       `;
     } else {
       // Left edge
       return `
-        <svg xmlns="http://www.w3.org/2000/svg" width="38.9074" height="198.3979" viewBox="0 0 38.9074 198.3979">
-          <polyline points="0 197.6479 38.1574 197.6479 38.1574 0 0 0" style="fill: #ffffff;"/>
-          <text transform="translate(27.028 188.4777) rotate(-90)" style="${fontStyle}">
-            <tspan x="0" y="0">your board</tspan>
+        <svg xmlns="http://www.w3.org/2000/svg" width="${B}" height="${L}" viewBox="0 0 ${B} ${L}">
+          <polyline points="0 ${(L - 0.75).toFixed(4)} ${(B - 0.75).toFixed(4)} ${(L - 0.75).toFixed(4)} ${(B - 0.75).toFixed(4)} 0.75 0 0.75" style="fill: #ffffff;"/>
+          <text transform="translate(21.5036 ${(L - 7.3433).toFixed(4)}) rotate(-90)" style="${fontStyle}">
+            <tspan x="0" y="0">${cfg.label}</tspan>
           </text>
-          <polyline points="0 197.6479 38.1574 197.6479 38.1574 0.75 14.3913 0.75" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 1.5px;"/>
+          <polyline points="0 ${(L - 0.75).toFixed(4)} ${(B - 0.75).toFixed(4)} ${(L - 0.75).toFixed(4)} ${(B - 0.75).toFixed(4)} 0.75 17.2203 0.75" style="fill: none; stroke: #000000; stroke-miterlimit: 10; stroke-width: 1.5px;"/>
         </svg>
       `;
     }
   }
 
-  updateButton() {
-    const cfg = this.buttonConfig;
-    // Initial position on top edge at x = 179.2263px (matching Illustrator artboard)
-    const initialOffset = this.segLeft + 179.2263;
-    const trackPos = initialOffset + this.scrollOffset;
-    const pos = this.calculatePosition(cfg, trackPos);
-    const isEdgeChange = cfg.currentEdge !== pos.edge;
-    cfg.currentEdge = pos.edge;
-
-    const el = this.btnElement;
-    if (!el) return;
-
-    if (isEdgeChange || !el.innerHTML) {
-      el.innerHTML = this.getButtonSvg(pos.edge);
-      el.className = `community-revolving-btn btn-${cfg.id} is-${pos.edge}`;
+  getInitialTrackPos(cfg) {
+    if (cfg.edge === 'top') {
+      return this.segLeft + cfg.edgeFrac * this.segTop;
+    } else if (cfg.edge === 'right') {
+      return this.segLeft + this.segTop + cfg.edgeFrac * this.segRight;
+    } else {
+      return cfg.edgeFrac * this.segLeft;
     }
+  }
 
-    if (pos.edge === 'top') {
-      el.style.top = '0px';
-      el.style.left = `${Math.round(pos.x)}px`;
-      el.style.right = 'auto';
-      el.style.bottom = 'auto';
-    } else if (pos.edge === 'left') {
-      el.style.top = `${Math.round(pos.y)}px`;
-      el.style.left = '0px';
-      el.style.right = 'auto';
-      el.style.bottom = 'auto';
-    } else if (pos.edge === 'right') {
-      el.style.top = `${Math.round(pos.y)}px`;
-      el.style.left = 'auto';
-      el.style.right = '0px';
-      el.style.bottom = 'auto';
-    }
+  updateButtons() {
+    this.buttonConfigs.forEach((cfg) => {
+      const initialOffset = this.getInitialTrackPos(cfg);
+      const trackPos = initialOffset + this.scrollOffset;
+      const pos = this.calculatePosition(cfg, trackPos);
+      const isEdgeChange = cfg.currentEdge !== pos.edge;
+      cfg.currentEdge = pos.edge;
+
+      const el = this.btnElements[cfg.id];
+      if (!el) return;
+
+      if (isEdgeChange || !el.innerHTML) {
+        el.innerHTML = this.getButtonSvg(pos.edge, cfg);
+        el.className = `community-revolving-btn btn-${cfg.id} is-${pos.edge}`;
+      }
+
+      if (pos.edge === 'top') {
+        el.style.top = '0px';
+        el.style.left = `${Math.round(pos.x)}px`;
+        el.style.right = 'auto';
+        el.style.bottom = 'auto';
+      } else if (pos.edge === 'left') {
+        el.style.top = `${Math.round(pos.y)}px`;
+        el.style.left = '0px';
+        el.style.right = 'auto';
+        el.style.bottom = 'auto';
+      } else if (pos.edge === 'right') {
+        el.style.top = `${Math.round(pos.y)}px`;
+        el.style.left = 'auto';
+        el.style.right = '0px';
+        el.style.bottom = 'auto';
+      }
+    });
   }
 }
 

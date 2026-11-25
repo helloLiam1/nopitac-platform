@@ -18,6 +18,7 @@ export class SortButton {
     this.edge = options.edge || 'right'; // 'top' | 'left' | 'right'
     this.isExpanded = false;
     this.emptyMode = Boolean(options.emptyMode);
+    this.onBeforeOpen = options.onBeforeOpen || null;
     this.onSortChange = options.onSortChange || null;
 
     // Shared domain list (synced with DomainPanel)
@@ -190,8 +191,7 @@ export class SortButton {
   }
 
   /* -------------------------------------------------------------
-     LEFT EDGE TEMPLATE (355.98 × 114.40 px) — matches new__sort left edge.svg
-     (X shifted by -4.9595 so bottom border starts flush at left screen edge x=0)
+     LEFT EDGE TEMPLATE (360.94 × 114.40 px) — matches panel_sort left edge.svg
   ------------------------------------------------------------- */
   renderLeftEdge() {
     this.widget.innerHTML = `
@@ -216,54 +216,53 @@ export class SortButton {
 
       <!-- Expandable Sort Options Content -->
       <div class="sort-content is-left-content" id="sortContent">
-        <svg class="sort-inner-svg" viewBox="0 0 355.9809 114.3995" xmlns="http://www.w3.org/2000/svg">
-          <!-- Section 1: sort by -->
+        <svg class="sort-inner-svg" viewBox="0 0 360.9404 114.3995" xmlns="http://www.w3.org/2000/svg">
+          <!-- Section 1: sort by (title left-aligned, vertical bracket on right) -->
           <g class="sort-layer sort-stagger-1">
-            <polyline points="35.0960 15.0892 35.0960 99.3102 139.4664 99.3103" class="inner-bracket"/>
-            <text transform="translate(90.5869 28.8521)" class="sort-section-title"><tspan x="0" y="0">sort by</tspan></text>
+            <polyline points="144.4259 15.0892 144.4259 99.3102 40.0555 99.3103" class="inner-bracket"/>
+            <text transform="translate(40.4409 28.8521)" class="sort-section-title"><tspan x="0" y="0">sort by</tspan></text>
           </g>
 
           <!-- Option: name -->
           <g class="sort-option-row sort-layer sort-stagger-2" data-option="name" data-group="sortBy">
-            <text transform="translate(82.3997 49.1268)" class="sort-option-label"><tspan x="0" y="0">name</tspan></text>
-            <path class="sort-tick-rect" d="M125.2687,49.2559v-8.5803h8.5803v8.5803h-8.5803Z"/>
-            <polyline class="sort-tick-underline" points="125.0187 50.2559 134.0990 50.2559"/>
-            <rect class="sort-option-hitbox" x="38" y="37" width="98" height="16" fill="transparent"/>
+            <text transform="translate(87.3592 49.1268)" class="sort-option-label"><tspan x="0" y="0">name</tspan></text>
+            <path class="sort-tick-rect" d="M130.2282,49.2559v-8.5803h8.5803v8.5803h-8.5803Z"/>
+            <polyline class="sort-tick-underline" points="129.9782 50.2559 139.0585 50.2559"/>
+            <rect class="sort-option-hitbox" x="42" y="37" width="98" height="16" fill="transparent"/>
           </g>
 
           <!-- Option: domains -->
           <g class="sort-option-row sort-layer sort-stagger-3" data-option="domains" data-group="sortBy">
-            <text transform="translate(61.5044 66.083)" class="sort-option-label"><tspan x="0" y="0">domains</tspan></text>
-            <path class="sort-tick-rect" d="M125.2687,66.0833v-8.5803h8.5803v8.5803h-8.5803Z"/>
-            <polyline class="sort-tick-underline" points="125.0187 67.0833 134.0990 67.0833"/>
-            <rect class="sort-option-hitbox" x="38" y="54" width="98" height="16" fill="transparent"/>
+            <text transform="translate(66.4639 66.083)" class="sort-option-label"><tspan x="0" y="0">domains</tspan></text>
+            <path class="sort-tick-rect" d="M130.2282,66.0833v-8.5803h8.5803v8.5803h-8.5803Z"/>
+            <polyline class="sort-tick-underline" points="129.9782 67.0833 139.0585 67.0833"/>
+            <rect class="sort-option-hitbox" x="42" y="54" width="98" height="16" fill="transparent"/>
           </g>
 
           <!-- Option: date added -->
           <g class="sort-option-row sort-layer sort-stagger-4" data-option="date-added" data-group="sortBy">
-            <text transform="translate(42.2568 82.8657)" class="sort-option-label"><tspan x="0" y="0">date added</tspan></text>
-            <path class="sort-tick-rect" d="M125.2687,82.8655v-8.5803h8.5803v8.5803h-8.5803Z"/>
-            <polyline class="sort-tick-underline" points="125.0187 83.8655 134.0990 83.8655"/>
-            <rect class="sort-option-hitbox" x="38" y="71" width="98" height="16" fill="transparent"/>
+            <text transform="translate(47.2163 82.8657)" class="sort-option-label"><tspan x="0" y="0">date added</tspan></text>
+            <path class="sort-tick-rect" d="M130.2282,82.8655v-8.5803h8.5803v8.5803h-8.5803Z"/>
+            <polyline class="sort-tick-underline" points="129.9782 83.8655 139.0585 83.8655"/>
+            <rect class="sort-option-hitbox" x="42" y="71" width="98" height="16" fill="transparent"/>
           </g>
 
-          <!-- Section 2: domains -->
+          <!-- Section 2: domains (title left-aligned, vertical bracket on right) -->
           <g class="sort-layer sort-stagger-5">
-            <polyline points="153.7027 15.0892 153.7016 99.3102 341.8708 99.3103" class="inner-bracket"/>
-            <line x1="153.6716" y1="31.1111" x2="341.8708" y2="31.1111" class="inner-divider-thin"/>
-            <polyline points="153.2364 43.2536 157.6660 43.2536 157.6660 31.101" class="inner-divider-thin"/>
-            <text transform="translate(280.8462 28.8076)" class="sort-section-title"><tspan x="0" y="0">domains</tspan></text>
+            <polyline points="346.8291 15.0892 346.8303 99.3102 158.6611 99.3103" class="inner-bracket"/>
+            <line x1="158.6311" y1="31.1111" x2="346.8303" y2="31.1111" class="inner-divider-thin"/>
+            <text transform="translate(158.6611 28.8071)" class="sort-section-title"><tspan x="0" y="0">domains</tspan></text>
           </g>
         </svg>
 
         <!-- Scrollable DomainType Chips (2-col right-aligned grid) -->
-        <div class="sort-domains-list sort-domains-left sort-layer sort-stagger-6" id="sortDomainsList" style="position: absolute; left: 162px; top: 34px; width: 180px; height: 63px;"></div>
+        <div class="sort-domains-list sort-domains-left sort-layer sort-stagger-6" id="sortDomainsList" style="position: absolute; left: 162px; top: 34px; width: 181px; height: 63px;"></div>
       </div>
     `;
   }
 
   /* -------------------------------------------------------------
-     RIGHT EDGE TEMPLATE (355.98 × 114.40 px) — matches new__sort right edge.svg
+     RIGHT EDGE TEMPLATE (360.94 × 114.40 px) — matches panel_sort right edge.svg
   ------------------------------------------------------------- */
   renderRightEdge() {
     this.widget.innerHTML = `
@@ -288,11 +287,11 @@ export class SortButton {
 
       <!-- Expandable Sort Options Content -->
       <div class="sort-content is-right-content" id="sortContent">
-        <svg class="sort-inner-svg" viewBox="0 0 355.9809 114.3995" xmlns="http://www.w3.org/2000/svg">
-          <!-- Section 1: sort by -->
+        <svg class="sort-inner-svg" viewBox="0 0 360.9398 114.3995" xmlns="http://www.w3.org/2000/svg">
+          <!-- Section 1: sort by (title right-aligned, vertical bracket on left) -->
           <g class="sort-layer sort-stagger-1">
-            <polyline points="118.9872 15.0892 118.9872 99.3102 14.6168 99.3103" class="inner-bracket"/>
-            <text transform="translate(15.0023 28.8519)" class="sort-section-title"><tspan x="0" y="0">sort by</tspan></text>
+            <polyline points="14.6168 15.0892 14.6168 99.3102 118.9872 99.3103" class="inner-bracket"/>
+            <text transform="translate(70.1078 28.8519)" class="sort-section-title"><tspan x="0" y="0">sort by</tspan></text>
           </g>
 
           <!-- Option: name -->
@@ -319,17 +318,16 @@ export class SortButton {
             <rect class="sort-option-hitbox" x="16" y="71" width="98" height="16" fill="transparent"/>
           </g>
 
-          <!-- Section 2: domains -->
+          <!-- Section 2: domains (title right-aligned, vertical bracket on left) -->
           <g class="sort-layer sort-stagger-5">
-            <polyline points="321.3905 15.0892 321.3916 99.3102 133.2224 99.3103" class="inner-bracket"/>
+            <polyline points="133.2235 15.0892 133.2224 99.3102 321.3916 99.3103" class="inner-bracket"/>
             <line x1="133.1924" y1="31.1111" x2="321.3916" y2="31.1111" class="inner-divider-thin"/>
-            <polyline points="320.0547 43.2636 315.6252 43.2636 315.6252 31.1111" class="inner-divider-thin"/>
-            <text transform="translate(133.7147 28.807)" class="sort-section-title"><tspan x="0" y="0">domains</tspan></text>
+            <text transform="translate(260.3671 28.807)" class="sort-section-title"><tspan x="0" y="0">domains</tspan></text>
           </g>
         </svg>
 
         <!-- Scrollable DomainType Chips (2-col left-aligned grid) -->
-        <div class="sort-domains-list sort-domains-right sort-layer sort-stagger-6" id="sortDomainsList" style="position: absolute; left: 133px; top: 34px; width: 181px; height: 63px;"></div>
+        <div class="sort-domains-list sort-domains-right sort-layer sort-stagger-6" id="sortDomainsList" style="position: absolute; left: 138px; top: 34px; width: 181px; height: 63px;"></div>
       </div>
     `;
   }
@@ -364,6 +362,8 @@ export class SortButton {
 
       const comp = DomainType.compute(item.name, {
         mode,
+        align: mode === 'center' ? 'center' : 'left',
+        outlineWidth: 0.5,
         bgColor: item.color,
         textColor: '#030021',
         fontSize: 16
@@ -537,25 +537,26 @@ export class SortButton {
         this.svgText.setAttribute('transform', `translate(${textX} 19.3559)`);
       }
     } else if (this.edge === 'left') {
-      const t = Math.min(1, Math.max(0, (w - 29.4562) / (355.9809 - 29.4562)));
-      const stubX = 10.5404 + (19.3558 - 10.5404) * t;
+      const t = Math.min(1, Math.max(0, (w - 29.4562) / (360.9404 - 29.4562)));
+      const stubX = 10.5404 + (16.9293 - 10.5404) * t;
       const rightX = (w - 0.75).toFixed(4);
       const bottomY = (h - 0.75).toFixed(4);
       this.borderLine.setAttribute('points', `${stubX.toFixed(4)} 0.7500 ${rightX} 0.7500 ${rightX} ${bottomY} 0 ${bottomY}`);
       if (this.svgText) {
-        const textY = (h - 7.4881).toFixed(4);
-        this.svgText.setAttribute('transform', `translate(19.3559 ${textY}) rotate(-90)`);
+        const textX = (19.3559 + (16.9287 - 19.3559) * t).toFixed(4);
+        const textY = (h - (7.4881 + (6.6841 - 7.4881) * t)).toFixed(4);
+        this.svgText.setAttribute('transform', `translate(${textX} ${textY}) rotate(-90)`);
       }
     } else if (this.edge === 'right') {
-      const t = Math.min(1, Math.max(0, (w - 29.4553) / (355.9809 - 29.4553)));
-      const notchStub = 10.5403 + (19.3558 - 10.5403) * t;
+      const t = Math.min(1, Math.max(0, (w - 29.4553) / (360.9398 - 29.4553)));
+      const notchStub = 10.5403 + (16.9287 - 10.5403) * t;
       const notchX = (w - notchStub).toFixed(4);
       const bottomY = (h - 0.75).toFixed(4);
       const rightX = w.toFixed(4);
       this.borderLine.setAttribute('points', `${notchX} ${bottomY} 0.7500 ${bottomY} 0.7500 0.7500 ${rightX} 0.7500`);
       if (this.svgText) {
-        const textX = (w - 19.3558).toFixed(4);
-        const textY = this.isExpanded ? 6.5234 : 7.4881;
+        const textX = (w - (19.3558 + (16.9287 - 19.3558) * t)).toFixed(4);
+        const textY = (7.4881 + (6.6846 - 7.4881) * t).toFixed(4);
         this.svgText.setAttribute('transform', `translate(${textX} ${textY}) rotate(90)`);
       }
     }
@@ -567,10 +568,10 @@ export class SortButton {
       w = this.isExpanded ? 134.1015 : 79.4022;
       h = this.isExpanded ? 293.414 : 29.4567;
     } else if (this.edge === 'left') {
-      w = this.isExpanded ? 355.9809 : 29.4562;
+      w = this.isExpanded ? 360.9404 : 29.4562;
       h = this.isExpanded ? 114.3995 : 79.4022;
     } else if (this.edge === 'right') {
-      w = this.isExpanded ? 355.9809 : 29.4553;
+      w = this.isExpanded ? 360.9398 : 29.4553;
       h = this.isExpanded ? 114.3995 : 79.4022;
     }
     this.renderBorderPointsFor(w, h);
@@ -622,6 +623,9 @@ export class SortButton {
 
   open() {
     if (this.isExpanded) return;
+    if (typeof this.onBeforeOpen === 'function') {
+      this.onBeforeOpen();
+    }
     this.isExpanded = true;
     window.dispatchEvent(new CustomEvent('nopitac:component-opened', { detail: { component: 'sort' } }));
 

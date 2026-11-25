@@ -233,6 +233,7 @@ export class BoardConcentricCircles {
     this.container = options.container || document.body;
     this.emptyMode = Boolean(options.emptyMode);
     this.startedEmpty = Boolean(options.emptyMode);
+    this.onSelectionChange = options.onSelectionChange || null;
     this.cx = 720;
     this.cy = 450;
     this.centerDiameter = 315; // 315 × 315 px circle on 1440 × 900 artboard
@@ -240,7 +241,7 @@ export class BoardConcentricCircles {
     this.centerColor = '#ffffff'; // Always white
     this.ringSpacing = 60;
     this.scale = 0.82305; // 36px font size (36 / 43.74)
-    this.tracking = -3; // Kerning -3 for all text
+    this.tracking = -2.5; // Kerning -2.5 for all text (increased +0.5 from -3)
     this.strokeWidth = UNDERLINE_HEIGHT * this.scale; // ~3.1636px
     this.baselineOffsetLocal = -7.14685;
 
@@ -298,10 +299,17 @@ export class BoardConcentricCircles {
     this.sortBy = null; // null | 'name' | 'domains' | 'date-added'
     this.filterDomains = []; // normalized domain keys
 
+    // Preserve base ring ordering so renames/edits stay reflected on default view
+    this.baseRings = INITIAL_RINGS.map((r) => ({
+      radius: r.radius,
+      names: [...r.names],
+      startAngleDeg: r.startAngleDeg ?? 0
+    }));
+
     // Deep clone initial rings
     this.rings = this.emptyMode
       ? []
-      : INITIAL_RINGS.map((r) => ({
+      : this.baseRings.map((r) => ({
           radius: r.radius,
           names: [...r.names],
           startAngleDeg: r.startAngleDeg ?? 0
@@ -408,6 +416,30 @@ export class BoardConcentricCircles {
           e.stopPropagation();
           this.selectPerson(personId);
         }
+      });
+    }
+
+    // Clicking background outside names, center circle, or board widgets deselects back to white
+    if (!this._bgClickBound) {
+      this._bgClickBound = true;
+      this.container.addEventListener('click', (e) => {
+        if (!this.selectedPersonId) return;
+        if (
+          e.target.closest(
+            '.concentric-name-group, .center-info-panel, .add-person-widget, .sort-widget, .domain-panel-widget, .photo-panel-widget, .board-moving-btn, .board-user-badge, .board-logo'
+          )
+        ) {
+          return;
+        }
+        // If an interactive drawer/panel was open, let that panel's own handler close it first
+        if (
+          document.querySelector(
+            '.add-person-widget.is-expanded, .sort-widget.is-expanded, .domain-panel-widget.is-open, .photo-panel-widget.is-open'
+          )
+        ) {
+          return;
+        }
+        this.deselectPerson();
       });
     }
 
@@ -769,6 +801,20 @@ export class BoardConcentricCircles {
   }
 
   /**
+   * Clears active selection, removes selection dots, empties center panel,
+   * and returns the board background to pure white (#ffffff).
+   */
+  deselectPerson() {
+    if (!this.selectedPersonId) return;
+    this.selectedPersonId = null;
+    this.updateSelectionDotsInDom();
+    if (this.sortBy === 'domains') {
+      this.updateNameColorsInDom();
+    }
+    this.updateSelectionUI();
+  }
+
+  /**
    * Updates fill/stroke colors of all rendered name groups in-place without rebuilding DOM or interrupting motion.
    */
   updateNameColorsInDom() {
@@ -876,9 +922,10 @@ export class BoardConcentricCircles {
         this.rings = this.packNamesIntoRings(activeIds);
         return;
       }
-      const baseRings = INITIAL_RINGS.map((r) => ({
+      const activeSet = new Set(activeIds);
+      const baseRings = this.baseRings.map((r) => ({
         radius: r.radius,
-        names: [...r.names],
+        names: r.names.filter((n) => activeSet.has(n)),
         startAngleDeg: r.startAngleDeg ?? 0
       }));
       const initialSet = new Set(baseRings.flatMap((r) => r.names));
@@ -1006,6 +1053,9 @@ export class BoardConcentricCircles {
         this.centerPanelEl.removeAttribute('data-selected-domain');
         this.centerPanelEl.setAttribute('data-domain-color', '#ffffff');
       }
+      if (typeof this.onSelectionChange === 'function') {
+        this.onSelectionChange(null, null);
+      }
       return;
     }
 
@@ -1094,6 +1144,10 @@ export class BoardConcentricCircles {
       this.centerPanelEl.setAttribute('data-selected-domain', person.domain || '');
       this.centerPanelEl.setAttribute('data-domain-color', domainColor);
     }
+
+    if (typeof this.onSelectionChange === 'function') {
+      this.onSelectionChange(person.id, person);
+    }
   }
 
   /**
@@ -1116,41 +1170,34 @@ export class BoardConcentricCircles {
     // Target width of square mask: 135px (fits comfortably in 218px square inside 315px circle)
     const targetSquareSize = 135;
     const scale = targetSquareSize / metrics.underlineWidth;
-    const strokeW = metrics.strokeWidth * scale;
-    const squareSize = targetSquareSize;
-    const squareX = metrics.squareX * scale;
-    const overlap = metrics.overlap * scale;
     const textAscent = Math.abs(metrics.fTy * scale);
 
-    // Contraction progress p in [0, 1]
-    const clampedP = Math.min(1, Math.max(0, p));
-    const H_mask = Math.max(0, squareSize * (1 - clampedP));
-    const leftStemHeight = Math.max(strokeW, (squareSize - overlap) * (1 - clampedP) + overlap);
-    const rightStemHeight = leftStemHeight;
-    const bottomUnderlineY = Math.max(0, (squareSize - overlap - strokeW) * (1 - clampedP));
+    // Contraction progress p in [0, 1] using unified PhotoFrameEngine geometry
+    const geom = this.photoEngine.computeCollapseGeometry(metrics, scale, p);
+    const word = this.photoEngine.buildWordLayers(metrics, scale, textColor);
 
-    // Dynamic header height: at p=0 it is ~175px; at p=1 it collapses down to ~40px
-    const fullHeight = textAscent + squareSize - overlap + 8;
-    const baseHeight = textAscent + strokeW + 8;
-    const currentHeaderHeight = baseHeight + (fullHeight - baseHeight) * (1 - clampedP);
+    // Dynamic header height: at p=0 fits full square frame; at p=1 collapses to text + curUnderlineY
+    const fullHeight = textAscent + geom.squareBottomPx + 8;
+    const baseHeight = textAscent + geom.stemTopY + geom.strokeW + 8;
+    const currentHeaderHeight = baseHeight + (fullHeight - baseHeight) * (1 - geom.p);
 
     this.centerHeaderEl.style.height = `${currentHeaderHeight.toFixed(2)}px`;
 
     // Width of SVG canvas
     const padX = 8;
-    const svgW = squareSize + padX * 2;
-    const shiftX = padX - squareX;
+    const svgW = geom.squareSizePx + padX * 2;
+    const shiftX = padX - geom.squareXPx;
     const shiftY = textAscent; // baseline is at y = shiftY
 
     const clipId = 'center-circle-photo-clip';
-    const clipRectX = squareX + shiftX;
-    const clipRectY = shiftY - overlap;
+    const clipRectX = geom.squareXPx + shiftX;
+    const clipRectY = shiftY + geom.squareYPx;
 
     // Image placement inside square mask
     const imgPlacement = this.photoEngine.calculateImagePlacement(
       clipRectX,
       clipRectY,
-      squareSize,
+      geom.squareSizePx,
       {
         imageNaturalWidth: photo.imageNaturalWidth || 200,
         imageNaturalHeight: photo.imageNaturalHeight || 200,
@@ -1160,61 +1207,44 @@ export class BoardConcentricCircles {
       }
     );
 
-    const imgOpacity = Math.max(0, 1 - clampedP * 1.3);
-
-    // Glyphs
-    const fInnerClean = stripUnderlineStub(metrics.fDb.innerSvg, metrics.fDb.baseline);
-    const bInnerClean = stripUnderlineStub(metrics.bDb.innerSvg, metrics.bDb.baseline);
-
-    const middlePaths = [];
-    for (let i = 1; i < metrics.chars.length - 1; i++) {
-      const ch = metrics.chars[i];
-      if (ch === ' ') continue;
-      const m = getCharMetrics(ch, null);
-      if (m?.d) {
-        const origX = metrics.positions[i] * scale;
-        middlePaths.push(`<path d="${m.d}" transform="translate(${origX.toFixed(3)}, 0) scale(${scale.toFixed(5)})" fill="${textColor}" />`);
-      }
-    }
-
-    const leftStemX = squareX;
-    const rightStemX = (metrics.underlineEndX * scale) - strokeW;
-
     const svgMarkup = `
       <svg class="center-photo-frame-svg" viewBox="0 0 ${svgW.toFixed(2)} ${currentHeaderHeight.toFixed(2)}" width="${svgW.toFixed(2)}" height="${currentHeaderHeight.toFixed(2)}" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <clipPath id="${clipId}">
-            <rect x="${clipRectX.toFixed(3)}" y="${clipRectY.toFixed(3)}" width="${squareSize.toFixed(3)}" height="${H_mask.toFixed(3)}" />
+            <rect x="${clipRectX.toFixed(3)}" y="${clipRectY.toFixed(3)}" width="${geom.squareSizePx.toFixed(3)}" height="${geom.clipMaskHeight.toFixed(3)}" />
           </clipPath>
         </defs>
 
         <!-- Layer 1: Clipped Image (collapses vertically as p -> 1) -->
         <g clip-path="url(#${clipId})">
-          <image href="${photo.imageHref}" x="${imgPlacement.x.toFixed(3)}" y="${imgPlacement.y.toFixed(3)}" width="${imgPlacement.width.toFixed(3)}" height="${imgPlacement.height.toFixed(3)}" preserveAspectRatio="none" opacity="${imgOpacity.toFixed(3)}" />
+          <image href="${photo.imageHref}" x="${imgPlacement.x.toFixed(3)}" y="${imgPlacement.y.toFixed(3)}" width="${imgPlacement.width.toFixed(3)}" height="${imgPlacement.height.toFixed(3)}" preserveAspectRatio="none" opacity="${geom.imageOpacity.toFixed(3)}" />
         </g>
 
         <!-- Layer 2: Extended Bracket Rails & Baseline Underline -->
         <g transform="translate(${shiftX.toFixed(3)}, ${shiftY.toFixed(3)})" fill="${textColor}">
-          <!-- Left bracket stem: contracts down to baseline -->
-          <rect x="${leftStemX.toFixed(3)}" y="0" width="${strokeW.toFixed(3)}" height="${leftStemHeight.toFixed(3)}" />
+          ${word.frontFallbackExt}
+          ${word.backFallbackExt}
 
-          <!-- Bottom underline: moves up to baseline y=0 as p -> 1 -->
-          <rect x="${squareX.toFixed(3)}" y="${bottomUnderlineY.toFixed(3)}" width="${squareSize.toFixed(3)}" height="${strokeW.toFixed(3)}" />
+          <!-- Left bracket stem: joins stemTopY flush down to rising bottom rail -->
+          <rect x="${word.leftStemX.toFixed(3)}" y="${geom.stemTopY.toFixed(3)}" width="${geom.strokeW.toFixed(3)}" height="${geom.stemHeight.toFixed(3)}" />
 
-          <!-- Right bracket stem: contracts down to baseline -->
-          <rect x="${rightStemX.toFixed(3)}" y="0" width="${strokeW.toFixed(3)}" height="${rightStemHeight.toFixed(3)}" />
+          <!-- Bottom underline: moves up to curUnderlineY as p -> 1 -->
+          <rect x="${geom.squareXPx.toFixed(3)}" y="${geom.bottomUnderlineY.toFixed(3)}" width="${geom.squareSizePx.toFixed(3)}" height="${geom.strokeW.toFixed(3)}" />
+
+          <!-- Right bracket stem: joins stemTopY flush down to rising bottom rail -->
+          <rect x="${word.rightStemX.toFixed(3)}" y="${geom.stemTopY.toFixed(3)}" width="${geom.strokeW.toFixed(3)}" height="${geom.stemHeight.toFixed(3)}" />
 
           <!-- Front letter with drop-stem anchor -->
           <g transform="translate(${(metrics.fTx * scale).toFixed(3)}, ${(metrics.fTy * scale).toFixed(3)}) scale(${scale.toFixed(5)})">
-            ${fInnerClean}
+            ${word.fInnerClean}
           </g>
 
           <!-- Middle Letters -->
-          ${middlePaths.join('\n          ')}
+          ${word.middlePaths.join('\n          ')}
 
           <!-- Back letter with rise-stem anchor -->
           <g transform="translate(${(metrics.bTx * scale).toFixed(3)}, ${(metrics.bTy * scale).toFixed(3)}) scale(${scale.toFixed(5)})">
-            ${bInnerClean}
+            ${word.bInnerClean}
           </g>
         </g>
       </svg>
@@ -1334,6 +1364,65 @@ export class BoardConcentricCircles {
     }
 
     this.selectedPersonId = cleanName;
+    this.rebuildRingsForCurrentSort();
+    this.render();
+    this.updateSelectionUI();
+  }
+
+  /**
+   * Updates an existing person's metadata (including renaming across rings/order) and re-renders.
+   */
+  updatePerson(originalId, data) {
+    if (!data || !data.fullName || !data.fullName.trim()) return;
+    const prevKey = String(originalId || '').trim().toLowerCase();
+    const newKey = data.fullName.trim().toLowerCase();
+    const existing = this.people.get(prevKey);
+
+    if (!existing) {
+      this.addPerson(data);
+      return;
+    }
+
+    const domain = (data.domain || '').trim() || existing.domain || 'artists';
+    const domainColor = data.domainColor || (domain ? this.getDomainColor(domain) : '#27ff83');
+    this.registerDomainColor(domain, domainColor);
+
+    const updatedRecord = {
+      id: newKey,
+      fullName: newKey,
+      domain,
+      place: (data.place ?? existing.place ?? '').trim().toLowerCase(),
+      year: (data.year ?? existing.year ?? '').trim(),
+      description: (data.whyCool || '').trim() || existing.description || '',
+      links: (data.links ?? existing.links ?? '').trim(),
+      photos: Array.isArray(data.photos) ? [...data.photos] : (existing.photos || [null]),
+      photo: data.photo !== undefined ? data.photo : (existing.photo || null),
+      dateAdded: existing.dateAdded,
+      dateAddedISO: existing.dateAddedISO
+    };
+
+    if (prevKey !== newKey) {
+      this.people.delete(prevKey);
+      const orderIdx = this.personOrder.indexOf(prevKey);
+      if (orderIdx >= 0) {
+        if (this.personOrder.includes(newKey)) {
+          this.personOrder.splice(orderIdx, 1);
+        } else {
+          this.personOrder[orderIdx] = newKey;
+        }
+      } else if (!this.personOrder.includes(newKey)) {
+        this.personOrder.push(newKey);
+      }
+
+      if (Array.isArray(this.baseRings)) {
+        this.baseRings.forEach((r) => {
+          r.names = r.names.map((n) => (n === prevKey ? newKey : n));
+        });
+      }
+    }
+
+    this.people.set(newKey, updatedRecord);
+    this.selectedPersonId = newKey;
     this.rebuildRingsForCurrentSort();
     this.render();
     this.updateSelectionUI();

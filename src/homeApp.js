@@ -1,5 +1,7 @@
 import lottie from 'lottie-web';
 import entryAnimationData from './assets/entry_animation.json';
+import { nopitacService } from './lib/nopitacService.js';
+import { isSupabaseConfigured, supabase } from './lib/supabaseClient.js';
 
 /**
  * NOPITAC — Home / Entry Screen Application
@@ -39,6 +41,7 @@ export class HomeApp {
 
     this.currentStageIndex = 0;
     this.currentAccentColor = '#f5003a';
+    this.lockedAuthColor = null;
     this.isTransitioning = false;
     this.buttonsShown = false;
     this.wheelTimeout = null;
@@ -255,14 +258,14 @@ export class HomeApp {
     if (this.signInToSignUpBtn) {
       this.signInToSignUpBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        this.openAuth('signup');
+        this.openAuth('signup', true);
       });
     }
 
     if (this.signUpToSignInBtn) {
       this.signUpToSignInBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        this.openAuth('signin');
+        this.openAuth('signin', true);
       });
     }
 
@@ -304,7 +307,7 @@ export class HomeApp {
 
     // Helper to persist auth and navigate to after-sign-up landing screen
     const completeAuthAndProceed = (userData) => {
-      const accent = this.currentAccentColor || '#6a76ff';
+      const accent = this.lockedAuthColor || this.currentAccentColor || '#6a76ff';
       try {
         localStorage.setItem('nopitac_user', JSON.stringify(userData));
         localStorage.setItem('nopitac_accent_color', accent);
@@ -314,8 +317,22 @@ export class HomeApp {
     };
 
     // Google Auth buttons
-    const handleGoogleAuth = (e) => {
+    const handleGoogleAuth = async (e) => {
       e.preventDefault();
+      if (isSupabaseConfigured && supabase) {
+        const accent = this.lockedAuthColor || this.currentAccentColor || '#6a76ff';
+        try {
+          localStorage.setItem('nopitac_accent_color', accent);
+        } catch (err) {}
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${window.location.origin}/landing.html?color=${encodeURIComponent(accent)}`
+          }
+        });
+        if (!error) return;
+        console.warn('Google OAuth unavailable, falling back:', error.message);
+      }
       const userData = {
         email: 'creative.member@nopitac.com',
         name: 'creative member',
@@ -334,37 +351,93 @@ export class HomeApp {
 
     // Form submissions
     if (this.signInForm) {
-      this.signInForm.addEventListener('submit', (e) => {
+      this.signInForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userInput = document.getElementById('signInUsername');
-        const val = userInput && userInput.value ? userInput.value.trim() : 'member';
-        const userData = {
-          username: val,
-          email: val.includes('@') ? val : `${val}@nopitac.com`,
+        const passInput = document.getElementById('signInPassword');
+        const val = userInput && userInput.value ? userInput.value.trim() : '';
+        const password = passInput ? passInput.value : '';
+
+        if (isSupabaseConfigured && val && password) {
+          const { data, error } = await nopitacService.signIn({ identifier: val, password });
+          if (error) {
+            alert(error.message || 'Sign in failed. Please check your credentials.');
+            return;
+          }
+          const user = data?.user;
+          const profileName = user?.user_metadata?.username || user?.user_metadata?.name || val;
+          completeAuthAndProceed({
+            id: user?.id,
+            username: profileName,
+            name: user?.user_metadata?.name || profileName,
+            email: user?.email || val,
+            provider: 'supabase',
+            loggedInAt: Date.now()
+          });
+          return;
+        }
+
+        const fallbackVal = val || 'member';
+        completeAuthAndProceed({
+          username: fallbackVal,
+          email: fallbackVal.includes('@') ? fallbackVal : `${fallbackVal}@nopitac.com`,
           provider: 'credentials',
           loggedInAt: Date.now()
-        };
-        completeAuthAndProceed(userData);
+        });
       });
     }
 
     if (this.signUpForm) {
-      this.signUpForm.addEventListener('submit', (e) => {
+      this.signUpForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const nameInput = document.getElementById('signUpName');
         const userInput = document.getElementById('signUpUsername');
         const emailInput = document.getElementById('signUpEmail');
+        const passInput = document.getElementById('signUpPassword');
+        const rePassInput = document.getElementById('signUpRePassword');
+
         const nameVal = nameInput && nameInput.value ? nameInput.value.trim() : 'Creative Member';
         const userVal = userInput && userInput.value ? userInput.value.trim() : 'member';
         const emailVal = emailInput && emailInput.value ? emailInput.value.trim() : `${userVal}@nopitac.com`;
-        const userData = {
+        const password = passInput ? passInput.value : '';
+        const rePassword = rePassInput ? rePassInput.value : '';
+
+        if (rePassInput && password !== rePassword) {
+          alert('Passwords do not match.');
+          return;
+        }
+
+        if (isSupabaseConfigured && emailVal && password) {
+          const accent = this.lockedAuthColor || this.currentAccentColor || '#6a76ff';
+          const { data, error } = await nopitacService.signUp({
+            name: nameVal,
+            username: userVal,
+            email: emailVal,
+            password,
+            accentColor: accent
+          });
+          if (error) {
+            alert(error.message || 'Sign up failed.');
+            return;
+          }
+          completeAuthAndProceed({
+            id: data?.user?.id,
+            name: nameVal,
+            username: userVal,
+            email: emailVal,
+            provider: 'supabase',
+            loggedInAt: Date.now()
+          });
+          return;
+        }
+
+        completeAuthAndProceed({
           name: nameVal,
           username: userVal,
           email: emailVal,
           provider: 'credentials',
           loggedInAt: Date.now()
-        };
-        completeAuthAndProceed(userData);
+        });
       });
     }
   }
@@ -388,13 +461,21 @@ export class HomeApp {
     this.authScreen.style.setProperty('--auth-right-scale', Math.max(0.60, scale).toFixed(3));
   }
 
-  openAuth(mode = 'signin') {
+  openAuth(mode = 'signin', preserveColor = false) {
     if (!this.authScreen) return;
     const cleanMode = mode.toLowerCase().includes('up') ? 'signup' : 'signin';
     this.authScreen.setAttribute('data-mode', cleanMode);
 
-    // Dynamic color: match the exact color of the rectangle on the home page when clicked
-    const accentColor = this.currentAccentColor || '#6a76ff';
+    // Lock the exact color of the rectangle on the home page when Sign In / Sign Up is clicked,
+    // and pause the home animation so the color remains consistent through auth and landing.
+    if (!preserveColor || !this.lockedAuthColor) {
+      this.lockedAuthColor = this.currentAccentColor || '#f5003a';
+    }
+    if (this.anim) {
+      this.anim.pause();
+    }
+
+    const accentColor = this.lockedAuthColor;
     this.authScreen.style.setProperty('--auth-accent-color', accentColor);
     try {
       localStorage.setItem('nopitac_accent_color', accentColor);
@@ -423,6 +504,10 @@ export class HomeApp {
   closeAuth() {
     if (!this.authScreen) return;
     this.authScreen.classList.remove('is-open');
+    this.lockedAuthColor = null;
+    if (this.anim) {
+      this.anim.play();
+    }
   }
 }
 

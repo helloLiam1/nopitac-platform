@@ -869,7 +869,7 @@ body.board-ui-body {
   left: 0 !important;
   right: auto !important;
   top: auto !important;
-  width: 355.98px;
+  width: 360.94px;
   height: 114.40px;
   transform: none !important;
   cursor: default;
@@ -898,7 +898,7 @@ body.board-ui-body {
 .sort-widget.is-edge-right.is-expanded {
   right: 0 !important;
   left: auto !important;
-  width: 355.98px;
+  width: 360.94px;
   height: 114.40px;
   transform: none;
   cursor: default;
@@ -1078,7 +1078,7 @@ body.board-ui-body {
   padding: 2px 0;
 }
 
-/* Left edge: 2-column right-aligned grid (matching new__sort left edge.svg) */
+/* Left edge: 2-column right-aligned grid (matching panel_sort left edge.svg) */
 .sort-domains-left {
   display: grid;
   grid-template-columns: auto auto;
@@ -1087,11 +1087,11 @@ body.board-ui-body {
   align-items: start;
   align-content: start;
   column-gap: 10px;
-  row-gap: 4px;
+  row-gap: 5px;
   padding: 2px 0;
 }
 
-/* Right edge: 2-column left-aligned grid (matching new__sort right edge.svg) */
+/* Right edge: 2-column left-aligned grid (matching panel_sort right edge.svg) */
 .sort-domains-right {
   display: grid;
   grid-template-columns: auto auto;
@@ -1100,7 +1100,7 @@ body.board-ui-body {
   align-items: start;
   align-content: start;
   column-gap: 10px;
-  row-gap: 4px;
+  row-gap: 5px;
   padding: 2px 0;
 }
 

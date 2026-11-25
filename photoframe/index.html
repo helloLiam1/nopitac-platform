@@ -50,6 +50,7 @@
           />
           <div class="preset-chips">
             <span class="preset-chip" data-name="charlie maignan">charlie maignan</span>
+            <span class="preset-chip" data-name="jon contino">jon contino</span>
             <span class="preset-chip" data-name="paula scher">paula scher</span>
             <span class="preset-chip" data-name="yuta eunho le">yuta eunho le</span>
             <span class="preset-chip" data-name="michael bierut">michael bierut</span>
@@ -91,6 +92,17 @@
           <div class="segmented-control">
             <button class="segmented-btn active" data-view="final">Final Frame</button>
             <button class="segmented-btn" data-view="steps">5-Step Process</button>
+            <button class="segmented-btn" data-view="animation">Animation</button>
+          </div>
+          <div class="animation-controls hidden" id="animationControlGroup">
+            <div class="slider-row" style="margin-top: 10px;">
+              <span>Collapse Progress</span>
+              <span class="slider-val" id="animProgressVal">0%</span>
+            </div>
+            <div class="animation-bar">
+              <button class="anim-play-btn" id="animPlayBtn" type="button">Pause</button>
+              <input type="range" id="animProgressSlider" class="range-slider" min="0" max="100" step="1" value="0" />
+            </div>
           </div>
         </div>
 

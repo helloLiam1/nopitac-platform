@@ -12,9 +12,15 @@ class PhotoFrameApp {
     this.name = 'charlie maignan';
     this.fontSize = 32;
     this.theme = 'both'; // 'light' | 'dark' | 'both'
-    this.viewMode = 'final'; // 'final' | 'steps'
+    this.viewMode = 'final'; // 'final' | 'steps' | 'animation'
     this.showCardBorder = true;
     this.cardPaddingRatio = 0.35;
+
+    // Animation preview state
+    this.animProgress = 0; // 0..1
+    this.isPlayingAnim = false;
+    this.animRafId = null;
+    this.animStartTs = null;
 
     // Image state
     this.defaultImageHref = '';
@@ -62,6 +68,10 @@ class PhotoFrameApp {
     // Buttons
     this.themeBtns = document.querySelectorAll('[data-theme]');
     this.viewBtns = document.querySelectorAll('[data-view]');
+    this.animationControlGroup = document.getElementById('animationControlGroup');
+    this.animPlayBtn = document.getElementById('animPlayBtn');
+    this.animProgressSlider = document.getElementById('animProgressSlider');
+    this.animProgressVal = document.getElementById('animProgressVal');
     this.exportSvgBtn = document.getElementById('exportSvgBtn');
     this.exportPngBtn = document.getElementById('exportPngBtn');
     this.copySvgBtn = document.getElementById('copySvgBtn');
@@ -199,14 +209,41 @@ class PhotoFrameApp {
         this.viewBtns.forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
         this.viewMode = btn.dataset.view;
+        if (this.animationControlGroup) {
+          this.animationControlGroup.classList.toggle('hidden', this.viewMode !== 'animation');
+        }
+        if (this.viewMode === 'animation') {
+          this.startAnimationLoop();
+        } else {
+          this.stopAnimationLoop();
+        }
         this.render();
       });
     });
 
+    if (this.animPlayBtn) {
+      this.animPlayBtn.addEventListener('click', () => {
+        if (this.isPlayingAnim) {
+          this.stopAnimationLoop();
+        } else {
+          this.startAnimationLoop();
+        }
+      });
+    }
+
+    if (this.animProgressSlider) {
+      this.animProgressSlider.addEventListener('input', (e) => {
+        this.stopAnimationLoop();
+        this.animProgress = parseInt(e.target.value, 10) / 100;
+        if (this.animProgressVal) this.animProgressVal.textContent = e.target.value + '%';
+        this.render();
+      });
+    }
+
     // Direct Canvas Drag to Pan image inside the stationary square mask
     this.stageViewport.addEventListener('mousedown', (e) => {
       const card = e.target.closest('.card-wrapper') || e.target.closest('svg.photo-frame-svg');
-      if (!card && this.viewMode !== 'final') return;
+      if (!card || this.viewMode === 'steps') return;
       e.preventDefault();
       this.isDragging = true;
       this.dragStartX = e.clientX;
@@ -247,7 +284,7 @@ class PhotoFrameApp {
 
     // Mouse wheel over canvas to zoom
     this.stageViewport.addEventListener('wheel', (e) => {
-      if (this.viewMode !== 'final') return;
+      if (this.viewMode === 'steps') return;
       e.preventDefault();
       const delta = e.deltaY * -0.0015;
       this.imageScale = Math.max(0.5, Math.min(3.0, this.imageScale + delta));
@@ -297,7 +334,53 @@ class PhotoFrameApp {
     }, 2200);
   }
 
+  startAnimationLoop() {
+    this.stopAnimationLoop();
+    this.isPlayingAnim = true;
+    if (this.animPlayBtn) this.animPlayBtn.textContent = 'Pause';
+    // Ping-pong with brief holds at open (p=0) and collapsed (p=1): 3.2s full cycle
+    const cycleMs = 3200;
+    this.animStartTs = performance.now() - this.animProgress * (cycleMs * 0.4);
+
+    const tick = (now) => {
+      if (!this.isPlayingAnim) return;
+      const t = ((now - this.animStartTs) % cycleMs) / cycleMs;
+      let p = 0;
+      if (t < 0.15) {
+        p = 0;
+      } else if (t < 0.5) {
+        p = (t - 0.15) / 0.35;
+        // Smoothstep easing
+        p = p * p * (3 - 2 * p);
+      } else if (t < 0.65) {
+        p = 1;
+      } else {
+        p = 1 - (t - 0.65) / 0.35;
+        p = p * p * (3 - 2 * p);
+      }
+
+      this.animProgress = p;
+      const pct = Math.round(p * 100);
+      if (this.animProgressSlider) this.animProgressSlider.value = String(pct);
+      if (this.animProgressVal) this.animProgressVal.textContent = `${pct}%`;
+      this.render();
+      this.animRafId = requestAnimationFrame(tick);
+    };
+
+    this.animRafId = requestAnimationFrame(tick);
+  }
+
+  stopAnimationLoop() {
+    this.isPlayingAnim = false;
+    if (this.animRafId) {
+      cancelAnimationFrame(this.animRafId);
+      this.animRafId = null;
+    }
+    if (this.animPlayBtn) this.animPlayBtn.textContent = 'Play';
+  }
+
   render() {
+    const progress = this.viewMode === 'animation' ? this.animProgress : 0;
     const opts = {
       fontSize: this.fontSize,
       imageHref: this.currentImageHref,
@@ -307,7 +390,8 @@ class PhotoFrameApp {
       imageNaturalWidth: this.imageNaturalWidth,
       imageNaturalHeight: this.imageNaturalHeight,
       showCardBorder: this.showCardBorder,
-      cardPaddingRatio: this.cardPaddingRatio
+      cardPaddingRatio: this.cardPaddingRatio,
+      progress
     };
 
     if (this.viewMode === 'steps') {
@@ -326,7 +410,7 @@ class PhotoFrameApp {
       `;
     } else {
       // Single card mode
-      const cardSvg = this.engine.renderFinalFrame(this.name, {
+      const cardSvg = this.engine.renderAnimatedFrame(this.name, progress, {
         ...opts,
         theme: this.theme
       });
