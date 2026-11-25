@@ -234,6 +234,7 @@ export class BoardConcentricCircles {
     this.emptyMode = Boolean(options.emptyMode);
     this.startedEmpty = Boolean(options.emptyMode);
     this.onSelectionChange = options.onSelectionChange || null;
+    this.onPersonAdded = typeof options.onPersonAdded === 'function' ? options.onPersonAdded : null;
     this.cx = 720;
     this.cy = 450;
     this.centerDiameter = 315; // 315 × 315 px circle on 1440 × 900 artboard
@@ -467,6 +468,7 @@ export class BoardConcentricCircles {
               <span class="center-info-year" id="centerInfoYear"></span>
             </div>
             <div class="center-info-body" id="centerInfoBody"></div>
+            <div class="center-info-links" id="centerInfoLinks"></div>
           </div>
         </div>
       `;
@@ -489,6 +491,7 @@ export class BoardConcentricCircles {
     this.centerPlaceEl = panel.querySelector('#centerInfoPlace');
     this.centerYearEl = panel.querySelector('#centerInfoYear');
     this.centerBodyEl = panel.querySelector('#centerInfoBody');
+    this.centerLinksEl = panel.querySelector('#centerInfoLinks');
 
     // Forward wheel events on the center circular panel:
     // When photo is attached, 2-phase scroll contracts the photo frame into baseline header first,
@@ -1046,6 +1049,10 @@ export class BoardConcentricCircles {
       if (this.centerYearEl) this.centerYearEl.textContent = '';
       if (this.centerMetaEl) this.centerMetaEl.style.display = 'none';
       if (this.centerBodyEl) this.centerBodyEl.innerHTML = '';
+      if (this.centerLinksEl) {
+        this.centerLinksEl.innerHTML = '';
+        this.centerLinksEl.style.display = 'none';
+      }
       if (this.centerScrollEl) this.centerScrollEl.scrollTop = 0;
       if (this.centerPanelEl) {
         this.centerPanelEl.classList.remove('has-selection', 'is-theme-dark', 'is-theme-light');
@@ -1132,6 +1139,8 @@ export class BoardConcentricCircles {
         this.centerBodyEl.appendChild(p);
       });
     }
+
+    this.renderPersonLinks(person.links);
 
     // Reset scroll position to top when switching person
     if (this.centerScrollEl) {
@@ -1319,14 +1328,63 @@ export class BoardConcentricCircles {
     }
   }
 
+  parseLinks(rawLinks) {
+    const raw = String(rawLinks || '').trim();
+    if (!raw) return [];
+    const tokens = raw
+      .split(/[\n,;]+/)
+      .flatMap((part) => {
+        const trimmed = part.trim();
+        if (!trimmed) return [];
+        const spaceParts = trimmed.split(/\s+/).filter(Boolean);
+        if (
+          spaceParts.length > 1 &&
+          spaceParts.every((seg) => /^(https?:\/\/|mailto:|tel:|www\.|[a-z0-9.-]+\.[a-z]{2,})/i.test(seg))
+        ) {
+          return spaceParts;
+        }
+        return [trimmed];
+      })
+      .filter(Boolean);
+
+    return tokens.map((label) => {
+      const hasScheme = /^(https?:\/\/|mailto:|tel:)/i.test(label);
+      const href = hasScheme ? label : `https://${label}`;
+      return { href, label };
+    });
+  }
+
+  renderPersonLinks(rawLinks) {
+    if (!this.centerLinksEl) return;
+    this.centerLinksEl.innerHTML = '';
+    const links = this.parseLinks(rawLinks);
+    if (links.length === 0) {
+      this.centerLinksEl.style.display = 'none';
+      return;
+    }
+
+    this.centerLinksEl.style.display = 'flex';
+    links.forEach(({ href, label }) => {
+      const a = document.createElement('a');
+      a.className = 'center-info-link';
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = label;
+      a.addEventListener('click', (e) => e.stopPropagation());
+      this.centerLinksEl.appendChild(a);
+    });
+  }
+
   /**
    * Dynamically adds a full person record from the Add Person panel, records the exact
    * dateAdded timestamp, places them into the rings (respecting active sort/filter),
    * and immediately selects them.
    */
-  addPerson(data) {
+  addPerson(data, options = {}) {
     if (!data || !data.fullName || !data.fullName.trim()) return;
     const cleanName = data.fullName.trim().toLowerCase();
+    const existedBefore = this.people.has(cleanName);
 
     if (this.emptyMode) {
       this.emptyMode = false;
@@ -1367,6 +1425,10 @@ export class BoardConcentricCircles {
     this.rebuildRingsForCurrentSort();
     this.render();
     this.updateSelectionUI();
+
+    if (!options.silent && !existedBefore && this.onPersonAdded) {
+      this.onPersonAdded(this.people.size);
+    }
   }
 
   /**

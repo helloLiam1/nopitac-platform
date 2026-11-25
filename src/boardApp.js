@@ -23,7 +23,7 @@ async function initBoard() {
   if (asParam && asParam.trim()) {
     loggedInUser = asParam.trim();
     try {
-      localStorage.setItem('nopitac_user', JSON.stringify({ name: loggedInUser }));
+      localStorage.setItem('nopitac_user', JSON.stringify({ username: loggedInUser, name: loggedInUser }));
     } catch (e) {}
   } else {
     const sbUser = await nopitacService.getCurrentUser();
@@ -39,8 +39,8 @@ async function initBoard() {
         if (stored) {
           const u = JSON.parse(stored);
           if (u && u.id) authUserId = u.id;
-          if (u && u.name) loggedInUser = u.name;
-          else if (u && u.username) loggedInUser = u.username;
+          if (u && u.username) loggedInUser = u.username;
+          else if (u && u.name) loggedInUser = u.name;
           else if (u && u.email) loggedInUser = u.email.split('@')[0];
         }
       } catch (e) {
@@ -99,6 +99,9 @@ async function initBoard() {
   // Hydrate board people & domains from Supabase if the board exists in DB
   if (username && username !== 'new user') {
     const dbBoard = await nopitacService.fetchBoardByUsername(username);
+    if (dbBoard?.profile?.username) {
+      boardButtonsManager.setUsername(dbBoard.profile.username);
+    }
     if (dbBoard && (dbBoard.people.length > 0 || dbBoard.domains.length > 0)) {
       dbBoard.domains.forEach((d) => {
         boardButtonsManager.concentricCircles?.registerDomainColor(d.name, d.color);
@@ -115,9 +118,13 @@ async function initBoard() {
           whyCool: p.description,
           links: p.links,
           photo: p.photo_url ? { imageHref: p.photo_url, ...(p.photo_settings || {}) } : null
-        });
+        }, { silent: true });
       });
       boardButtonsManager.concentricCircles?.deselectPerson();
+      boardButtonsManager.updateLogoCount(
+        boardButtonsManager.concentricCircles?.people?.size ?? 0,
+        { animate: false }
+      );
     }
   }
 

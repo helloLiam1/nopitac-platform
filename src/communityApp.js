@@ -378,7 +378,8 @@ export class CommunityApp {
       const stored = localStorage.getItem('nopitac_user');
       if (stored) {
         const user = JSON.parse(stored);
-        if (user && user.name) username = user.name;
+        if (user && user.username) username = user.username;
+        else if (user && user.name) username = user.name;
         else if (user && user.email) username = user.email.split('@')[0];
       }
     } catch (e) {}

@@ -64,6 +64,14 @@ export class BoardButtonsManager {
       });
     }
     this.buttons.push({
+      id: 'community',
+      label: 'community',
+      length: 144.9882,
+      weight: 400,
+      initialTau: 0.6250,
+      currentEdge: 'top'
+    });
+    this.buttons.push({
       id: 'sort',
       label: 'sort',
       length: 79.40,
@@ -72,11 +80,13 @@ export class BoardButtonsManager {
       currentEdge: 'right'
     });
 
-    // Scroll state
+    // Scroll & logo state
     this.scrollOffset = 0;
     this.targetScrollOffset = 0;
     this.isTicking = false;
     this.elements = {};
+    this.logoCount = 0;
+    this.logoAnimFrameId = null;
 
     this.init();
   }
@@ -86,6 +96,7 @@ export class BoardButtonsManager {
     this.renderConcentricCircles();
     this.renderButtons();
     this.renderLogo();
+    this.updateLogoCount(this.concentricCircles?.people?.size ?? 0, { animate: false });
     this.renderUserBadge();
     this.bindEvents();
     this.update();
@@ -99,6 +110,9 @@ export class BoardButtonsManager {
         if (!this.isVisiting) {
           this.updateEditButtonMode(Boolean(selectedPersonId));
         }
+      },
+      onPersonAdded: (newCount) => {
+        this.updateLogoCount(newCount, { animate: true });
       }
     });
   }
@@ -225,13 +239,109 @@ export class BoardButtonsManager {
     this.trackLength = this.segLeft + this.segTop + this.segRight;
   }
 
+  formatLogoCount(count) {
+    const safe = Math.max(0, Math.floor(Number(count) || 0));
+    return String(safe).padStart(2, '0');
+  }
+
+  evalCubicBezierY(x, x1, y1, x2, y2) {
+    const clampedX = Math.max(0, Math.min(1, x));
+    const sampleX = (t) => 3 * (1 - t) * (1 - t) * t * x1 + 3 * (1 - t) * t * t * x2 + t * t * t;
+    const sampleY = (t) => 3 * (1 - t) * (1 - t) * t * y1 + 3 * (1 - t) * t * t * y2 + t * t * t;
+    let lo = 0;
+    let hi = 1;
+    let mid = clampedX;
+    for (let i = 0; i < 12; i++) {
+      mid = (lo + hi) * 0.5;
+      if (sampleX(mid) < clampedX) lo = mid;
+      else hi = mid;
+    }
+    return sampleY(mid);
+  }
+
+  setLogoRestGeometry(count) {
+    const label = this.formatLogoCount(count);
+    if (this.logoBottomBarEl) this.logoBottomBarEl.setAttribute('width', '130.7477');
+    if (this.logoRightTickEl) this.logoRightTickEl.setAttribute('x', '125.2283');
+    if (this.logoCountTextEl) this.logoCountTextEl.removeAttribute('transform');
+    if (this.logoCountSpanEl) this.logoCountSpanEl.textContent = label;
+    if (this.logoEl) this.logoEl.setAttribute('aria-label', `Nopitac ${Math.max(0, Math.floor(Number(count) || 0))} logo`);
+  }
+
+  updateLogoCount(count, { animate = false } = {}) {
+    const nextCount = Math.max(0, Math.floor(Number(count) || 0));
+    const prevCount = this.logoCount;
+    this.logoCount = nextCount;
+
+    if (!this.logoEl || !this.logoCountSpanEl) return;
+
+    if (animate && nextCount > prevCount) {
+      this.playLogoAddAnimation(prevCount, nextCount);
+    } else {
+      if (this.logoAnimFrameId) {
+        cancelAnimationFrame(this.logoAnimFrameId);
+        this.logoAnimFrameId = null;
+      }
+      this.setLogoRestGeometry(nextCount);
+    }
+  }
+
+  playLogoAddAnimation(fromCount, toCount) {
+    if (this.logoAnimFrameId) {
+      cancelAnimationFrame(this.logoAnimFrameId);
+      this.logoAnimFrameId = null;
+    }
+
+    // Matches logo_when_person_added.json (24fps, expand frames 0->6, swap text at frame 6, contract frames 6->12)
+    const halfDuration = 250;
+    const totalDuration = 500;
+    const maxShift = 12.78;
+    const startLabel = this.formatLogoCount(fromCount);
+    const endLabel = this.formatLogoCount(toCount);
+    const startTime = performance.now();
+    let swapped = false;
+
+    if (this.logoCountSpanEl) this.logoCountSpanEl.textContent = startLabel;
+
+    const step = (now) => {
+      const elapsed = now - startTime;
+      if (elapsed >= totalDuration) {
+        this.logoAnimFrameId = null;
+        this.setLogoRestGeometry(toCount);
+        return;
+      }
+
+      let dx = 0;
+      if (elapsed < halfDuration) {
+        const u = this.evalCubicBezierY(elapsed / halfDuration, 0.219, 0, 0.262, 1);
+        dx = maxShift * u;
+      } else {
+        if (!swapped) {
+          swapped = true;
+          if (this.logoCountSpanEl) this.logoCountSpanEl.textContent = endLabel;
+        }
+        const u = this.evalCubicBezierY((elapsed - halfDuration) / halfDuration, 0.697, 0, 0.667, 1);
+        dx = maxShift * (1 - u);
+      }
+
+      if (this.logoBottomBarEl) this.logoBottomBarEl.setAttribute('width', (130.7477 + dx).toFixed(3));
+      if (this.logoRightTickEl) this.logoRightTickEl.setAttribute('x', (125.2283 + dx).toFixed(3));
+      if (this.logoCountTextEl) this.logoCountTextEl.setAttribute('transform', `translate(${dx.toFixed(3)} 0)`);
+
+      this.logoAnimFrameId = requestAnimationFrame(step);
+    };
+
+    this.logoAnimFrameId = requestAnimationFrame(step);
+  }
+
   renderLogo() {
     let logo = this.container.querySelector('#boardLogo');
+    const initialLabel = this.formatLogoCount(this.logoCount);
     if (!logo) {
       logo = document.createElement('div');
       logo.className = 'board-logo';
       logo.id = 'boardLogo';
-      logo.setAttribute('aria-label', 'Nopitac 245 logo');
+      logo.setAttribute('aria-label', `Nopitac ${this.logoCount} logo`);
       logo.innerHTML = `
         <svg class="board-logo-svg" viewBox="0 0 131.5249 49.8797" width="131.5249" height="49.8797" xmlns="http://www.w3.org/2000/svg">
           <path d="M113.3054,20.2456c0-6.5969,4.8461-11.1742,11.758-11.1742,2.6914,0,4.4352.7133,6.4615,1.4622v6.7796l-.3587.1347c-1.6725-1.7792-3.0514-2.7669-5.7442-2.7669-3.3656,0-5.6997,2.2887-5.6997,5.5647s2.3341,5.5647,5.6997,5.5647c2.6927,0,4.3076-1.0932,5.7442-2.9101l.3587.1793v6.6992c-2.2901.9308-3.8591,1.6411-6.5964,1.6411-6.777,0-11.6232-4.5773-11.6232-11.1742Z"/>
@@ -267,14 +377,18 @@ export class BoardButtonsManager {
             <path d="M0,9.6729l.0485-.1932h.7315v3.0376c-.0202-1.4293-.145-2.3267-.78-2.8444Z"/>
           </g>
           <rect x=".7772" y="30.7193" width="6.2966" height="19.1603"/>
-          <rect x="125.2283" y="35.3619" width="6.2966" height="14.5178"/>
-          <rect x="63.0027" y="-18.6425" width="6.2966" height="130.7477" transform="translate(112.8824 -19.4197) rotate(90)"/>
-          <text transform="translate(107.0783 42.4499)" style="font-family: 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10.2687px; font-weight: 700; fill: #000000;"><tspan x="0" y="0">245</tspan></text>
+          <rect id="boardLogoRightTick" x="125.2283" y="35.3619" width="6.2966" height="14.5178"/>
+          <rect id="boardLogoBottomBar" x=".7772" y="43.5831" width="130.7477" height="6.2966"/>
+          <text id="boardLogoCountText" x="124.2" y="42.4499" text-anchor="end" style="font-family: 'HelveticaNeue-Bold', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10.2687px; font-weight: 700; fill: #000000;"><tspan id="boardLogoCount" x="124.2" y="42.4499">${initialLabel}</tspan></text>
         </svg>
       `;
       this.container.appendChild(logo);
     }
     this.logoEl = logo;
+    this.logoBottomBarEl = logo.querySelector('#boardLogoBottomBar');
+    this.logoRightTickEl = logo.querySelector('#boardLogoRightTick');
+    this.logoCountTextEl = logo.querySelector('#boardLogoCountText');
+    this.logoCountSpanEl = logo.querySelector('#boardLogoCount');
   }
 
   renderUserBadge() {
@@ -386,6 +500,9 @@ export class BoardButtonsManager {
           this.handleEditButtonClick(e);
         } else if (btn.id === 'save-board') {
           this.handleSaveBoardClick(e);
+        } else if (btn.id === 'community') {
+          if (e) e.stopPropagation();
+          window.location.href = '/community.html';
         }
       };
 
@@ -412,11 +529,6 @@ export class BoardButtonsManager {
     // passive: false allows e.preventDefault() to disable browser overscroll/rubber-band bounce
     // ensuring scrolling is completely endless and uninhibited in both directions
     const onWheel = (e) => {
-      // Allow native scrolling inside the center circular info panel
-      if (e.target.closest('.center-info-panel')) {
-        return;
-      }
-
       // Pause button motion while any form/panel is expanded
       if (isAnyExpanded()) {
         if (
@@ -429,7 +541,14 @@ export class BoardButtonsManager {
         return;
       }
 
-      e.preventDefault();
+      // Let native vertical scrolling work inside the text area when a non-photo person is selected,
+      // while still allowing edge buttons to revolve on every wheel scroll anywhere on the board.
+      const allowNativeCenterScroll =
+        Boolean(e.target.closest('.center-info-panel.has-selection .center-info-scroll')) &&
+        Boolean(this.concentricCircles && !this.concentricCircles.hasSelectedPhoto);
+      if (!allowNativeCenterScroll) {
+        e.preventDefault();
+      }
 
       let dy = e.deltaY;
       if (e.deltaMode === 1) dy *= 20; // Lines mode (Windows notched wheels)
@@ -449,9 +568,6 @@ export class BoardButtonsManager {
     }, { passive: true });
 
     this.container.addEventListener('touchmove', (e) => {
-      if (e.target.closest('.center-info-panel')) {
-        return;
-      }
       if (isAnyExpanded()) {
         if (
           e.target.closest('.field-input-box') || 
@@ -462,7 +578,12 @@ export class BoardButtonsManager {
         return;
       }
       if (e.touches.length === 1) {
-        e.preventDefault();
+        const allowNativeCenterScroll =
+          Boolean(e.target.closest('.center-info-panel.has-selection .center-info-scroll')) &&
+          Boolean(this.concentricCircles && !this.concentricCircles.hasSelectedPhoto);
+        if (!allowNativeCenterScroll) {
+          e.preventDefault();
+        }
         const dy = touchStartY - e.touches[0].clientY;
         touchStartY = e.touches[0].clientY;
         // Direct 1:1 speed with touch drag
