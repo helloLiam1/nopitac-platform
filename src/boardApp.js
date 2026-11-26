@@ -96,6 +96,15 @@ async function initBoard() {
   window.__addPersonButton = boardButtonsManager.addPersonComponent;
   window.__photoPanel = boardButtonsManager.addPersonComponent?.photoPanel;
 
+  // Hydrate locally cached custom domains first
+  const localCustomDomains = boardButtonsManager.getLocalCustomDomains();
+  localCustomDomains.forEach((d) => {
+    if (!d?.name || !d?.color) return;
+    boardButtonsManager.concentricCircles?.registerDomainColor(d.name, d.color);
+    boardButtonsManager.sortComponent?.addDomain({ name: d.name, color: d.color });
+    boardButtonsManager.addPersonComponent?.domainPanel?.addDomain?.({ name: d.name, color: d.color });
+  });
+
   // Hydrate board people & domains from Supabase if the board exists in DB
   if (username && username !== 'new user') {
     const dbBoard = await nopitacService.fetchBoardByUsername(username);
@@ -109,6 +118,11 @@ async function initBoard() {
         boardButtonsManager.addPersonComponent?.domainPanel?.addDomain?.({ name: d.name, color: d.color });
       });
       dbBoard.people.forEach((p) => {
+        if (p.domain && p.domain_color) {
+          boardButtonsManager.concentricCircles?.registerDomainColor(p.domain, p.domain_color);
+          boardButtonsManager.sortComponent?.addDomain({ name: p.domain, color: p.domain_color });
+          boardButtonsManager.addPersonComponent?.domainPanel?.addDomain?.({ name: p.domain, color: p.domain_color });
+        }
         boardButtonsManager.concentricCircles?.addPerson({
           fullName: p.full_name,
           domain: p.domain,

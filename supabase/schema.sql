@@ -51,6 +51,26 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
+-- Resolve auth email from username so users can sign in with username OR email
+create or replace function public.get_email_by_username(lookup_username text)
+returns text
+language plpgsql
+security definer set search_path = public, auth
+as $$
+declare
+  found_email text;
+begin
+  select u.email into found_email
+  from public.profiles p
+  join auth.users u on u.id = p.id
+  where p.username = lower(trim(lookup_username))
+  limit 1;
+  return found_email;
+end;
+$$;
+
+grant execute on function public.get_email_by_username(text) to anon, authenticated;
+
 -- 2. Custom Domains per user
 create table if not exists public.domains (
   id uuid primary key default gen_random_uuid(),

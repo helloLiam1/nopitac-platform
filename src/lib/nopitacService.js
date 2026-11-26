@@ -71,21 +71,74 @@ export const nopitacService = {
     return { data };
   },
 
+  async resolveEmailByIdentifier(identifier) {
+    const trimmed = String(identifier || '').trim();
+    if (!trimmed) return { email: '', isUsername: false };
+    if (trimmed.includes('@')) return { email: trimmed, isUsername: false };
+
+    const usernameKey = trimmed.toLowerCase();
+    // Try secure RPC lookup first (returns auth email for matching username)
+    try {
+      const { data: resolvedEmail, error: rpcError } = await supabase.rpc('get_email_by_username', {
+        lookup_username: usernameKey
+      });
+      if (!rpcError && resolvedEmail && typeof resolvedEmail === 'string' && resolvedEmail.includes('@')) {
+        return { email: resolvedEmail, isUsername: true, foundProfile: true };
+      }
+    } catch (e) {}
+
+    // Check if username exists in profiles so we can give a clear message when RPC isn't installed yet
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', usernameKey)
+      .maybeSingle();
+
+    return {
+      email: trimmed,
+      isUsername: true,
+      foundProfile: Boolean(prof)
+    };
+  },
+
   async signIn({ identifier, password }) {
     if (!isSupabaseConfigured || !supabase) return { error: new Error('Supabase not configured') };
-    let email = identifier.trim();
-    if (!email.includes('@')) {
-      // Allow signing in with username if profile exists; fallback to email lookup
-      const { data: prof } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('username', email.toLowerCase())
-        .maybeSingle();
-      if (!prof) {
-        email = `${email}@nopitac.com`;
+    const { email, isUsername, foundProfile } = await this.resolveEmailByIdentifier(identifier);
+
+    if (isUsername && !email.includes('@')) {
+      if (foundProfile) {
+        return {
+          error: new Error(
+            'Please sign in with your email address (username sign-in requires running the get_email_by_username SQL snippet in Supabase).'
+          )
+        };
       }
+      return supabase.auth.signInWithPassword({ email: `${email}@nopitac.com`, password });
     }
+
     return supabase.auth.signInWithPassword({ email, password });
+  },
+
+  async resetPasswordForEmail(identifier) {
+    if (!isSupabaseConfigured || !supabase) return { error: new Error('Supabase not configured') };
+    const { email, isUsername } = await this.resolveEmailByIdentifier(identifier);
+    if (!email || !email.includes('@')) {
+      return {
+        error: new Error(
+          isUsername
+            ? 'Please enter the email address associated with your account to receive a password reset link.'
+            : 'Please enter a valid email address.'
+        )
+      };
+    }
+    return supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/?reset=1`
+    });
+  },
+
+  async updatePassword(newPassword) {
+    if (!isSupabaseConfigured || !supabase) return { error: new Error('Supabase not configured') };
+    return supabase.auth.updateUser({ password: newPassword });
   },
 
   async signOut() {
@@ -142,11 +195,42 @@ export const nopitacService = {
 
   async saveDomain(ownerId, { name, color }) {
     if (!isSupabaseConfigured || !supabase || !ownerId) return;
+    const cleanName = String(name || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    if (!cleanName) return;
     await supabase.from('domains').upsert({
       owner_id: ownerId,
-      name: name.trim().toLowerCase(),
+      name: cleanName,
       color
     }, { onConflict: 'owner_id,name' });
+  },
+
+  async updateDomain(ownerId, { originalName, name, color }) {
+    if (!isSupabaseConfigured || !supabase || !ownerId) return;
+    const prevKey = String(originalName || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    const nextKey = String(name || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    if (!nextKey) return;
+
+    if (prevKey && prevKey !== nextKey) {
+      await supabase
+        .from('domains')
+        .delete()
+        .eq('owner_id', ownerId)
+        .eq('name', prevKey);
+    }
+
+    await supabase.from('domains').upsert({
+      owner_id: ownerId,
+      name: nextKey,
+      color
+    }, { onConflict: 'owner_id,name' });
+
+    if (prevKey) {
+      await supabase
+        .from('people')
+        .update({ domain: nextKey, domain_color: color })
+        .eq('owner_id', ownerId)
+        .eq('domain', prevKey);
+    }
   },
 
   async upsertPerson(ownerId, personData, originalName = null) {

@@ -421,6 +421,40 @@ export class BoardButtonsManager {
     this.userNameEl = badge.querySelector('#boardUserName');
   }
 
+  getCustomDomainsStorageKey() {
+    const key = (this.username || 'new user').trim().toLowerCase();
+    return `nopitac_custom_domains_${key}`;
+  }
+
+  getLocalCustomDomains() {
+    try {
+      const raw = localStorage.getItem(this.getCustomDomainsStorageKey());
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  persistCustomDomainLocal({ originalName = null, name, color }) {
+    if (!name || !color) return;
+    const normNext = name.replace(/\s+/g, ' ').trim().toLowerCase();
+    const normPrev = originalName ? originalName.replace(/\s+/g, ' ').trim().toLowerCase() : null;
+    try {
+      const list = this.getLocalCustomDomains();
+      const targetIdx = normPrev
+        ? list.findIndex((d) => (d.name || '').replace(/\s+/g, ' ').trim().toLowerCase() === normPrev)
+        : list.findIndex((d) => (d.name || '').replace(/\s+/g, ' ').trim().toLowerCase() === normNext);
+      if (targetIdx >= 0) {
+        list[targetIdx] = { name: normNext, color };
+      } else {
+        list.push({ name: normNext, color });
+      }
+      localStorage.setItem(this.getCustomDomainsStorageKey(), JSON.stringify(list));
+    } catch (e) {}
+  }
+
   setUsername(name) {
     this.username = name || 'henry who';
     if (this.userNameEl) {
@@ -449,14 +483,36 @@ export class BoardButtonsManager {
         },
         onAddDomain: (newDomain) => {
           if (newDomain && newDomain.name && newDomain.color) {
+            const cleanKey = newDomain.name.replace(/\s+/g, ' ').trim().toLowerCase();
             if (this.concentricCircles) {
-              this.concentricCircles.registerDomainColor(newDomain.name, newDomain.color);
+              this.concentricCircles.registerDomainColor(cleanKey, newDomain.color);
             }
             if (this.sortComponent) {
-              this.sortComponent.addDomain(newDomain);
+              this.sortComponent.addDomain({ name: newDomain.name, color: newDomain.color });
             }
+            this.persistCustomDomainLocal({ name: cleanKey, color: newDomain.color });
             if (this.authUserId) {
-              nopitacService.saveDomain(this.authUserId, newDomain);
+              nopitacService.saveDomain(this.authUserId, { name: cleanKey, color: newDomain.color });
+            }
+          }
+        },
+        onUpdateDomain: (updatedDomain) => {
+          if (updatedDomain && updatedDomain.name && updatedDomain.color) {
+            const prevKey = (updatedDomain.originalName || updatedDomain.name).replace(/\s+/g, ' ').trim().toLowerCase();
+            const nextKey = updatedDomain.name.replace(/\s+/g, ' ').trim().toLowerCase();
+            if (this.concentricCircles) {
+              this.concentricCircles.updateDomain(prevKey, { name: nextKey, color: updatedDomain.color });
+            }
+            if (this.sortComponent) {
+              this.sortComponent.updateDomain(prevKey, { name: updatedDomain.name, color: updatedDomain.color });
+            }
+            this.persistCustomDomainLocal({ originalName: prevKey, name: nextKey, color: updatedDomain.color });
+            if (this.authUserId) {
+              nopitacService.updateDomain(this.authUserId, {
+                originalName: prevKey,
+                name: nextKey,
+                color: updatedDomain.color
+              });
             }
           }
         }

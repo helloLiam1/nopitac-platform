@@ -346,6 +346,42 @@ export class BoardConcentricCircles {
     }
   }
 
+  updateDomain(originalName, { name, color }) {
+    const prevKey = normalizeDomainKey(originalName);
+    const nextKey = normalizeDomainKey(name);
+    if (!nextKey || !color) return;
+
+    if (prevKey && prevKey !== nextKey) {
+      this.domainColors.delete(prevKey);
+      const orderIdx = this.domainOrder.indexOf(prevKey);
+      if (orderIdx >= 0) {
+        if (this.domainOrder.includes(nextKey)) {
+          this.domainOrder.splice(orderIdx, 1);
+        } else {
+          this.domainOrder[orderIdx] = nextKey;
+        }
+      }
+    }
+    this.registerDomainColor(nextKey, color);
+
+    // Update any people using the edited domain
+    if (prevKey) {
+      for (const person of this.people.values()) {
+        if (normalizeDomainKey(person.domain) === prevKey) {
+          person.domain = nextKey;
+        }
+      }
+    }
+
+    if (Array.isArray(this.filterDomains) && prevKey && prevKey !== nextKey) {
+      this.filterDomains = this.filterDomains.map((d) => (d === prevKey ? nextKey : d));
+    }
+
+    this.rebuildRingsForCurrentSort();
+    this.render();
+    this.updateSelectionUI();
+  }
+
   /**
    * Returns the render color for a person's name, underline, and selection dots.
    * When sortBy === 'domains', names take their domain color (with the active board

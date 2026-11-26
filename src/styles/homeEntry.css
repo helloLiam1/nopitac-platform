@@ -408,14 +408,24 @@ body.home-body {
 .auth-screen[data-mode="signin"] .auth-form-signin {
   display: block;
 }
-.auth-screen[data-mode="signin"] .auth-form-signup {
+.auth-screen[data-mode="signin"] .auth-form-signup,
+.auth-screen[data-mode="signin"] .auth-form-reset {
   display: none;
 }
 
-.auth-screen[data-mode="signup"] .auth-form-signin {
+.auth-screen[data-mode="signup"] .auth-form-signin,
+.auth-screen[data-mode="signup"] .auth-form-reset {
   display: none;
 }
 .auth-screen[data-mode="signup"] .auth-form-signup {
+  display: block;
+}
+
+.auth-screen[data-mode="reset"] .auth-form-signin,
+.auth-screen[data-mode="reset"] .auth-form-signup {
+  display: none;
+}
+.auth-screen[data-mode="reset"] .auth-form-reset {
   display: block;
 }
 
@@ -527,6 +537,17 @@ body.home-body {
   z-index: 5;
   cursor: text;
   pointer-events: auto;
+}
+
+.auth-field-input:-webkit-autofill,
+.auth-field-input:-webkit-autofill:hover,
+.auth-field-input:-webkit-autofill:focus,
+.auth-field-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 100px #ffffff inset !important;
+  box-shadow: 0 0 0 100px #ffffff inset !important;
+  -webkit-text-fill-color: #000000 !important;
+  caret-color: #000000;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* 'done' submit button row (centered below password/re-password) */

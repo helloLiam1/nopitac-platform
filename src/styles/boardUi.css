@@ -1427,6 +1427,11 @@ body.board-ui-body {
   opacity: 0.92;
 }
 
+.domain-chip-wrapper.is-selected {
+  outline: 1.5px solid #000000;
+  outline-offset: 1px;
+}
+
 .domain-chip-wrapper svg {
   display: block;
   max-width: 100%;
@@ -1446,6 +1451,18 @@ body.board-ui-body {
   box-sizing: border-box;
   line-height: 18px;
   z-index: 2;
+}
+
+.top-domain-name-input {
+  text-align: center;
+}
+
+.left-domain-name-input {
+  text-align: right;
+}
+
+.right-domain-name-input {
+  text-align: left;
 }
 
 .domain-done-btn {
@@ -1470,6 +1487,7 @@ body.board-ui-body {
 
 .domain-color-picker:hover,
 .domain-color-picker.is-active,
+.domain-panel-widget.is-editing .domain-color-picker,
 .domain-panel-widget:hover .domain-color-picker {
   opacity: 1;
 }

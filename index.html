@@ -12,8 +12,10 @@
   <link rel="stylesheet" href="/src/styles/homeEntry.css">
   <script>
     // If user is already logged in, immediately redirect to board with zero flash
+    // (unless returning from a password-reset recovery link)
     try {
-      if (localStorage.getItem('nopitac_user')) {
+      const isRecovery = window.location.search.includes('reset=1') || window.location.hash.includes('type=recovery');
+      if (!isRecovery && localStorage.getItem('nopitac_user')) {
         window.location.replace('/board.html');
       }
     } catch (e) { }
@@ -149,10 +151,41 @@
               aria-label="Sign in with Google"></button>
           </div>
 
-          <!-- Mode switch link below -->
+          <!-- Mode switch & password reset links below -->
           <div class="auth-field-row auth-toggle-row" style="--field-idx: 6;">
+            <button type="button" class="auth-mode-switch-btn" id="forgotPasswordBtn">forgot password?</button>
+          </div>
+          <div class="auth-field-row auth-toggle-row" style="--field-idx: 7;">
             <button type="button" class="auth-mode-switch-btn" id="signInToSignUpBtn">don’t have an account? sign
               up</button>
+          </div>
+        </form>
+
+        <!-- Reset Password Form (shown when returning from recovery link) -->
+        <form id="resetPasswordForm" class="auth-form-fields auth-form-reset" autocomplete="new-password">
+          <div class="auth-field-row" data-field="reset-password" style="--field-idx: 1;">
+            <label for="resetNewPassword" class="auth-field-label">new password</label>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <input type="password" id="resetNewPassword" class="auth-field-input" autocomplete="new-password" />
+          </div>
+
+          <div class="auth-field-row" data-field="reset-confirm" style="--field-idx: 2;">
+            <label for="resetConfirmPassword" class="auth-field-label">re-password</label>
+            <svg class="auth-field-underline-svg" viewBox="0 0 306 40" preserveAspectRatio="none">
+              <polyline points="305 0 305 38 1 38" class="auth-field-underline" />
+            </svg>
+            <input type="password" id="resetConfirmPassword" class="auth-field-input" autocomplete="new-password" />
+          </div>
+
+          <div class="auth-field-row auth-done-row" style="--field-idx: 3;">
+            <button type="submit" id="resetDoneBtn" class="auth-done-btn" aria-label="Save new password">
+              <span class="auth-done-label">done</span>
+              <svg class="auth-done-underline-svg" viewBox="0 0 130 28" preserveAspectRatio="none">
+                <polyline points="129 0 129 26 1 26 1 0" class="auth-field-underline" />
+              </svg>
+            </button>
           </div>
         </form>
 

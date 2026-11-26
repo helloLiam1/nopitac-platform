@@ -35,6 +35,22 @@ export const PRESET_COLORS = [
   '#a855f7'  // purple
 ];
 
+export function normalizeDomainKey(name) {
+  return String(name || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+export function formatMultilineDomain(name) {
+  return String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .join('\n')
+    .toLowerCase();
+}
+
 export class DomainPanel {
   constructor(options = {}) {
     this.container = options.container || document.body;
@@ -44,11 +60,60 @@ export class DomainPanel {
     this.emptyMode = Boolean(options.emptyMode);
     this.onSelect = options.onSelect || null;
     this.onAddDomain = options.onAddDomain || null;
+    this.onUpdateDomain = options.onUpdateDomain || null;
 
     this.domains = this.emptyMode ? [] : [...INITIAL_DOMAINS];
     this.selectedColor = PRESET_COLORS[0];
+    this.editingOriginalKey = null;
 
     this.init();
+  }
+
+  addDomain(domainObj) {
+    if (!domainObj || !domainObj.name) return;
+    const key = normalizeDomainKey(domainObj.name);
+    if (!key) return;
+    const formattedName = formatMultilineDomain(domainObj.name);
+    const existing = this.domains.find((d) => normalizeDomainKey(d.name) === key);
+    if (existing) {
+      if (domainObj.color) existing.color = domainObj.color;
+      existing.name = formattedName;
+    } else {
+      this.domains.push({
+        name: formattedName,
+        color: domainObj.color || PRESET_COLORS[0]
+      });
+    }
+    if (this.isOpen) {
+      this.renderDomainList();
+    }
+  }
+
+  updateDomain(originalName, updatedObj) {
+    if (!updatedObj || !updatedObj.name) return;
+    const prevKey = normalizeDomainKey(originalName);
+    const nextKey = normalizeDomainKey(updatedObj.name);
+    const formattedName = formatMultilineDomain(updatedObj.name);
+    const nextColor = updatedObj.color || PRESET_COLORS[0];
+
+    const idx = this.domains.findIndex((d) => normalizeDomainKey(d.name) === prevKey);
+    if (idx >= 0) {
+      // Remove duplicate target if renaming onto another existing entry
+      const dupIdx = this.domains.findIndex((d, i) => i !== idx && normalizeDomainKey(d.name) === nextKey);
+      if (dupIdx >= 0) {
+        this.domains.splice(dupIdx, 1);
+      }
+      const refreshedIdx = this.domains.findIndex((d) => normalizeDomainKey(d.name) === prevKey);
+      if (refreshedIdx >= 0) {
+        this.domains[refreshedIdx] = { name: formattedName, color: nextColor };
+      }
+    } else {
+      this.domains.push({ name: formattedName, color: nextColor });
+    }
+
+    if (this.isOpen) {
+      this.renderDomainList();
+    }
   }
 
   init() {
@@ -197,17 +262,17 @@ export class DomainPanel {
           <polyline points="27.2156 34.832 27.2156 39.2615 15.0631 39.2615" class="domain-bracket-thin" />
         </g>
 
-        <!-- Layer 3: New Domain Heading -->
+        <!-- Layer 3: New / Edit Domain Heading -->
         <g class="domain-anim-layer domain-stagger-3">
-          <text transform="translate(20.4772 191.5911)" class="domain-title">
-            <tspan x="0" y="0">new domain</tspan>
+          <text id="domainModeHeading" x="75.4" y="191.5911" text-anchor="middle" class="domain-title">
+            <tspan id="domainModeHeadingText" x="75.4" y="191.5911">new domain</tspan>
           </text>
         </g>
 
         <!-- Layer 4: Enter Domain Input Bracket -->
         <g id="domainEnterGroup" class="domain-anim-layer domain-stagger-4">
-          <text id="placeholderEnterDomain" transform="translate(33.2211 213.7391)" class="domain-input-placeholder">
-            <tspan x="0" y="0">enter domain</tspan>
+          <text id="placeholderEnterDomain" x="75.4" y="213.7391" text-anchor="middle" class="domain-input-placeholder">
+            <tspan x="75.4" y="213.7391">enter domain</tspan>
           </text>
           <polyline points="14.8013 206.702 14.8695 220.4731 136.1044 220.4731 136.0363 206.702" class="domain-bracket" />
         </g>
@@ -270,17 +335,17 @@ export class DomainPanel {
           <polyline points="132.5186 43.7521 128.0891 43.7521 128.0891 31.5995" class="domain-bracket-thin" />
         </g>
 
-        <!-- Layer 3: Col 2 New Domain Heading -->
+        <!-- Layer 3: Col 2 New / Edit Domain Heading -->
         <g class="domain-anim-layer domain-stagger-3">
-          <text transform="translate(149.6032 27.8087)" class="domain-title">
-            <tspan x="0" y="0">new domain</tspan>
+          <text id="domainModeHeading" transform="translate(149.6032 27.8087)" class="domain-title">
+            <tspan id="domainModeHeadingText" x="0" y="0">new domain</tspan>
           </text>
         </g>
 
-        <!-- Layer 4: Enter Domain Input Bracket -->
+        <!-- Layer 4: Enter Domain Input Bracket (Right-aligned on left edge) -->
         <g id="domainEnterGroup" class="domain-anim-layer domain-stagger-4">
-          <text id="placeholderEnterDomain" transform="translate(149.599 49.9562)" class="domain-input-placeholder">
-            <tspan x="0" y="0">enter domain</tspan>
+          <text id="placeholderEnterDomain" x="267" y="49.9562" text-anchor="end" class="domain-input-placeholder">
+            <tspan x="267" y="49.9562">enter domain</tspan>
           </text>
           <polyline points="149.5987 56.6904 270.8337 56.6904 270.7655 37.9584" class="domain-bracket" />
         </g>
@@ -343,25 +408,25 @@ export class DomainPanel {
           <polyline points="15.3542 43.7521 19.7837 43.7521 19.7837 31.5995" class="domain-bracket-thin" />
         </g>
 
-        <!-- Layer 3: Col 2 New Domain Heading -->
+        <!-- Layer 3: Col 2 New / Edit Domain Heading -->
         <g class="domain-anim-layer domain-stagger-3">
-          <text transform="translate(160.065 27.809)" class="domain-title">
-            <tspan x="0" y="0">new domain</tspan>
+          <text id="domainModeHeading" x="270" y="27.809" text-anchor="end" class="domain-title">
+            <tspan id="domainModeHeadingText" x="270" y="27.809">new domain</tspan>
           </text>
         </g>
 
-        <!-- Layer 4: Enter Domain Input Bracket -->
+        <!-- Layer 4: Enter Domain Input Bracket (Left-aligned on right edge) -->
         <g id="domainEnterGroup" class="domain-anim-layer domain-stagger-4">
-          <text id="placeholderEnterDomain" transform="translate(185.5512 49.9564)" class="domain-input-placeholder">
-            <tspan x="0" y="0">enter domain</tspan>
+          <text id="placeholderEnterDomain" x="152" y="49.9564" text-anchor="start" class="domain-input-placeholder">
+            <tspan x="152" y="49.9564">enter domain</tspan>
           </text>
           <polyline points="270.0837 56.6904 148.8487 56.6904 148.9168 37.9584" class="domain-bracket" />
         </g>
 
         <!-- Layer 5: Choose Colour Selector Bracket -->
         <g id="domainColourGroup" class="domain-anim-layer domain-stagger-5">
-          <text id="placeholderChooseColour" transform="translate(178.8871 83.309)" class="domain-input-placeholder">
-            <tspan x="0" y="0">choose colour</tspan>
+          <text id="placeholderChooseColour" x="267" y="83.309" text-anchor="end" class="domain-input-placeholder">
+            <tspan x="267" y="83.309">choose colour</tspan>
           </text>
           <polyline points="270.0837 90.0426 148.8487 90.0426 148.9168 76.2716" class="domain-bracket" />
         </g>
@@ -403,12 +468,20 @@ export class DomainPanel {
 
     this.domains.forEach((item) => {
       const chipEl = document.createElement('div');
-      chipEl.className = 'domain-chip-wrapper';
+      const itemKey = normalizeDomainKey(item.name);
+      const isEditingThis = this.editingOriginalKey && this.editingOriginalKey === itemKey;
+      chipEl.className = `domain-chip-wrapper${isEditingThis ? ' is-selected' : ''}`;
       chipEl.setAttribute('data-domain', item.name);
-      chipEl.title = `Select ${item.name.replace(/\n/g, ' ')}`;
+      chipEl.setAttribute('data-domain-key', itemKey);
+      chipEl.title = isEditingThis
+        ? `Click again to assign ${itemKey}`
+        : `Select ${itemKey}`;
+
+      // Multi-word domain names automatically place each word onto a new line
+      const multilineText = formatMultilineDomain(item.name);
 
       // Use DomainType engine to compute exact layout and inward partial outline
-      const comp = DomainType.compute(item.name, {
+      const comp = DomainType.compute(multilineText, {
         mode: mode,
         bgColor: item.color,
         textColor: '#030021',
@@ -420,11 +493,88 @@ export class DomainPanel {
 
       chipEl.onclick = (e) => {
         e.stopPropagation();
-        this.selectDomain(item.name);
+        this.handleChipClick(item);
       };
 
       listContainer.appendChild(chipEl);
     });
+  }
+
+  handleChipClick(item) {
+    const clickedKey = normalizeDomainKey(item.name);
+    // Second click on the already-selected domain assigns it directly
+    if (this.editingOriginalKey === clickedKey) {
+      this.assignDomain(item.name, item.color);
+      return;
+    }
+
+    // First click loads the existing domain into "edit domain" mode
+    this.enterEditDomainMode(item);
+  }
+
+  enterEditDomainMode(item) {
+    const key = normalizeDomainKey(item.name);
+    this.editingOriginalKey = key;
+    this.selectedColor = item.color || PRESET_COLORS[0];
+
+    if (this.widget) {
+      this.widget.classList.add('is-editing');
+    }
+
+    const headingSpan = this.widget?.querySelector('#domainModeHeadingText');
+    if (headingSpan) {
+      headingSpan.textContent = 'edit domain';
+    }
+
+    const input = this.widget?.querySelector('#domainNameInput');
+    const placeholder = this.widget?.querySelector('#placeholderEnterDomain');
+    if (input) {
+      input.value = key;
+    }
+    if (placeholder) {
+      placeholder.style.opacity = '0';
+    }
+
+    const colorPlaceholder = this.widget?.querySelector('#placeholderChooseColour');
+    if (colorPlaceholder) {
+      colorPlaceholder.style.fill = this.selectedColor;
+      colorPlaceholder.style.opacity = '0';
+    }
+
+    this.renderColorPicker();
+    this.renderDomainList();
+  }
+
+  resetToNewDomainMode() {
+    this.editingOriginalKey = null;
+    this.selectedColor = PRESET_COLORS[0];
+
+    if (this.widget) {
+      this.widget.classList.remove('is-editing');
+    }
+
+    const headingSpan = this.widget?.querySelector('#domainModeHeadingText');
+    if (headingSpan) {
+      headingSpan.textContent = 'new domain';
+    }
+
+    const input = this.widget?.querySelector('#domainNameInput');
+    const placeholder = this.widget?.querySelector('#placeholderEnterDomain');
+    if (input) {
+      input.value = '';
+    }
+    if (placeholder) {
+      placeholder.style.opacity = '1';
+    }
+
+    const colorPlaceholder = this.widget?.querySelector('#placeholderChooseColour');
+    if (colorPlaceholder) {
+      colorPlaceholder.style.fill = '#808080';
+      colorPlaceholder.style.opacity = '1';
+    }
+
+    this.renderColorPicker();
+    this.renderDomainList();
   }
 
   renderColorPicker() {
@@ -517,57 +667,87 @@ export class DomainPanel {
     const input = this.widget.querySelector('#domainNameInput');
     if (!input) return;
 
-    const rawName = input.value.trim();
-    if (!rawName) return;
+    const singleLineName = normalizeDomainKey(input.value);
+    if (!singleLineName) return;
 
-    // Check if domain already exists
-    const exists = this.domains.some(d => d.name.toLowerCase() === rawName.toLowerCase());
-    if (!exists) {
+    const multilineName = formatMultilineDomain(singleLineName);
+    const chosenColor = this.selectedColor || PRESET_COLORS[0];
+
+    if (this.editingOriginalKey) {
+      const originalKey = this.editingOriginalKey;
+      this.updateDomain(originalKey, { name: multilineName, color: chosenColor });
+      if (typeof this.onUpdateDomain === 'function') {
+        this.onUpdateDomain({
+          originalName: originalKey,
+          name: multilineName,
+          color: chosenColor
+        });
+      }
+      this.assignDomain(singleLineName, chosenColor);
+      return;
+    }
+
+    // Creating or picking in 'new domain' mode: finalize on Done click
+    const existing = this.domains.find((d) => normalizeDomainKey(d.name) === singleLineName);
+    let finalColor = chosenColor;
+    if (!existing) {
       const newDomain = {
-        name: rawName,
-        color: this.selectedColor || PRESET_COLORS[0]
+        name: multilineName,
+        color: chosenColor
       };
       this.domains.push(newDomain);
       if (typeof this.onAddDomain === 'function') {
         this.onAddDomain(newDomain);
       }
+    } else {
+      finalColor = existing.color || chosenColor;
     }
 
-    input.value = '';
-    const placeholder = this.widget.querySelector('#placeholderEnterDomain');
-    if (placeholder) placeholder.style.opacity = '1';
-
-    this.renderDomainList();
-
-    // Scroll to bottom of domain list to show new item
-    const listContainer = this.widget.querySelector('#domainListScroll');
-    if (listContainer) {
-      listContainer.scrollTop = listContainer.scrollHeight;
-    }
+    this.assignDomain(singleLineName, finalColor);
   }
 
-  selectDomain(name) {
-    // Format name (replace newline with space for text input)
-    const formatted = name.replace(/\n+/g, ' ');
-    const found = this.domains.find(
-      (d) => d.name === name || d.name.replace(/\n+/g, ' ') === formatted || d.name.toLowerCase() === formatted.toLowerCase()
-    );
-    const color = found ? found.color : null;
+  assignDomain(name, explicitColor = null) {
+    const formatted = normalizeDomainKey(name);
+    const found = this.domains.find((d) => normalizeDomainKey(d.name) === formatted);
+    const color = explicitColor || (found ? found.color : null);
     if (typeof this.onSelect === 'function') {
       this.onSelect(formatted, color);
     }
     this.close();
   }
 
-  open(addPersonRect, viewportWidth, usableHeight) {
+  selectDomain(name) {
+    this.assignDomain(name);
+  }
+
+  open(addPersonRect, viewportWidth, usableHeight, initialDomainName = '') {
     if (this._closeTimer) {
       clearTimeout(this._closeTimer);
       this._closeTimer = null;
     }
     this.isOpen = true;
     this.updatePosition(addPersonRect, viewportWidth, usableHeight);
+
+    const existingKey = normalizeDomainKey(initialDomainName);
+    const matched = existingKey
+      ? this.domains.find((d) => normalizeDomainKey(d.name) === existingKey)
+      : null;
+
+    if (matched) {
+      this.editingOriginalKey = existingKey;
+      this.selectedColor = matched.color || PRESET_COLORS[0];
+    } else {
+      this.editingOriginalKey = null;
+      this.selectedColor = PRESET_COLORS[0];
+    }
+
     // Render in closed initial animation state first so border draw-in & stagger transitions fire cleanly
     this.render(false);
+    if (matched) {
+      this.enterEditDomainMode(matched);
+    } else {
+      this.resetToNewDomainMode();
+    }
     this.widget.style.display = 'block';
 
     // Force layout flush so the closed start state is committed before adding .is-open

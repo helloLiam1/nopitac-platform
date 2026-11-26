@@ -31,9 +31,10 @@ export const STAGES = [
 
 export class HomeApp {
   constructor() {
+    const isRecovery = window.location.search.includes('reset=1') || window.location.hash.includes('type=recovery');
     // If user is already logged in, immediately redirect to their Nopitac board
     try {
-      if (localStorage.getItem('nopitac_user')) {
+      if (!isRecovery && localStorage.getItem('nopitac_user')) {
         window.location.replace('/board.html');
         return;
       }
@@ -50,6 +51,16 @@ export class HomeApp {
     this.initScaling();
     this.initAnimation();
     this.bindEvents();
+
+    if (isRecovery) {
+      this.openAuth('reset');
+    } else if (isSupabaseConfigured && supabase) {
+      supabase.auth.onAuthStateChange((event) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          this.openAuth('reset');
+        }
+      });
+    }
   }
 
   initElements() {
@@ -65,6 +76,8 @@ export class HomeApp {
     this.authBackBtn = document.getElementById('authBackBtn');
     this.signInForm = document.getElementById('signInForm');
     this.signUpForm = document.getElementById('signUpForm');
+    this.resetPasswordForm = document.getElementById('resetPasswordForm');
+    this.forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
     this.signInGoogleBtn = document.getElementById('signInGoogleBtn');
     this.signUpGoogleBtn = document.getElementById('signUpGoogleBtn');
     this.signInToSignUpBtn = document.getElementById('signInToSignUpBtn');
@@ -367,6 +380,56 @@ export class HomeApp {
       this.signUpGoogleBtn.addEventListener('click', handleGoogleAuth);
     }
 
+    if (this.forgotPasswordBtn) {
+      this.forgotPasswordBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const userInput = document.getElementById('signInUsername');
+        const currentVal = userInput?.value?.trim() || '';
+        const entered = window.prompt('Enter the email address for your Nopitac account to reset your password:', currentVal);
+        if (!entered || !entered.trim()) return;
+        const { error } = await nopitacService.resetPasswordForEmail(entered.trim());
+        if (error) {
+          alert(error.message || 'Could not send reset email.');
+        } else {
+          alert('Password reset link sent! Check your email inbox (and spam folder).');
+        }
+      });
+    }
+
+    if (this.resetPasswordForm) {
+      this.resetPasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const passEl = document.getElementById('resetNewPassword');
+        const confirmEl = document.getElementById('resetConfirmPassword');
+        const newPassword = passEl?.value || '';
+        const confirmPassword = confirmEl?.value || '';
+        if (newPassword.length < 6) {
+          alert('Password must be at least 6 characters.');
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          alert('Passwords do not match.');
+          return;
+        }
+        const { error } = await nopitacService.updatePassword(newPassword);
+        if (error) {
+          alert(error.message || 'Could not update password.');
+          return;
+        }
+        const profile = await nopitacService.getCurrentUser();
+        if (profile) {
+          completeAuthAndProceed({
+            ...profile,
+            provider: 'supabase',
+            loggedInAt: Date.now()
+          });
+        } else {
+          alert('Password updated! You can now sign in.');
+          this.openAuth('signin', true);
+        }
+      });
+    }
+
     // Form submissions
     if (this.signInForm) {
       this.signInForm.addEventListener('submit', async (e) => {
@@ -383,11 +446,12 @@ export class HomeApp {
             return;
           }
           const user = data?.user;
-          const profileName = user?.user_metadata?.username || user?.user_metadata?.name || val;
+          const profile = await nopitacService.getCurrentUser();
+          const profileName = profile?.username || user?.user_metadata?.username || user?.user_metadata?.name || val;
           completeAuthAndProceed({
             id: user?.id,
             username: profileName,
-            name: user?.user_metadata?.name || profileName,
+            name: profile?.name || user?.user_metadata?.name || profileName,
             email: user?.email || val,
             provider: 'supabase',
             loggedInAt: Date.now()
@@ -481,7 +545,8 @@ export class HomeApp {
 
   openAuth(mode = 'signin', preserveColor = false) {
     if (!this.authScreen) return;
-    const cleanMode = mode.toLowerCase().includes('up') ? 'signup' : 'signin';
+    const lower = mode.toLowerCase();
+    const cleanMode = lower.includes('reset') ? 'reset' : (lower.includes('up') ? 'signup' : 'signin');
     this.authScreen.setAttribute('data-mode', cleanMode);
 
     // Lock the exact color of the rectangle on the home page when Sign In / Sign Up is clicked,
@@ -507,9 +572,18 @@ export class HomeApp {
     void this.authScreen.offsetWidth; // force reflow
     this.authScreen.classList.add('is-open');
 
-    // Auto-focus first input field after animation begins
+    // Auto-focus first input field after animation begins & sync any browser autofill
     setTimeout(() => {
-      if (cleanMode === 'signin') {
+      document.querySelectorAll('.auth-field-input').forEach((inp) => {
+        const row = inp.closest('.auth-field-row');
+        if (row && inp.value && inp.value.length > 0) {
+          row.classList.add('has-value');
+        }
+      });
+      if (cleanMode === 'reset') {
+        const input = document.getElementById('resetNewPassword');
+        if (input) input.focus();
+      } else if (cleanMode === 'signin') {
         const input = document.getElementById('signInUsername');
         if (input) input.focus();
       } else {

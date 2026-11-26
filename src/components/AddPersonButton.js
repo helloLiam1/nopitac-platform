@@ -41,6 +41,7 @@ export class AddPersonButton {
     this.emptyMode = Boolean(options.emptyMode);
     this.onDone = options.onDone || null;
     this.onAddDomain = options.onAddDomain || null;
+    this.onUpdateDomain = options.onUpdateDomain || null;
     this.editingPersonId = null;
     this.isEditMode = false;
 
@@ -74,6 +75,11 @@ export class AddPersonButton {
       onAddDomain: (newDomain) => {
         if (typeof this.onAddDomain === 'function') {
           this.onAddDomain(newDomain);
+        }
+      },
+      onUpdateDomain: (updatedDomain) => {
+        if (typeof this.onUpdateDomain === 'function') {
+          this.onUpdateDomain(updatedDomain);
         }
       }
     });
@@ -898,7 +904,8 @@ export class AddPersonButton {
     };
     const viewportWidth = window.innerWidth;
     const usableHeight = window.innerHeight - 80;
-    this.domainPanel.open(rect, viewportWidth, usableHeight);
+    const currentDomain = this.inputDomain ? this.inputDomain.value.trim() : (this.formData.domain || '');
+    this.domainPanel.open(rect, viewportWidth, usableHeight, currentDomain);
   }
 
   openPhotoPanel() {

@@ -45,14 +45,52 @@ export class SortButton {
   addDomain(domainObj) {
     if (!domainObj || !domainObj.name) return;
     const norm = domainObj.name.replace(/\s+/g, ' ').trim().toLowerCase();
-    const exists = this.domains.some(
+    if (!norm) return;
+    const formattedName = domainObj.name.trim().split(/\s+/).filter(Boolean).join('\n').toLowerCase();
+    const existing = this.domains.find(
       (d) => d.name.replace(/\s+/g, ' ').trim().toLowerCase() === norm
     );
-    if (!exists) {
-      this.domains.push({ name: domainObj.name, color: domainObj.color });
-      this.renderDomainChips();
-      this.syncSelection();
+    if (existing) {
+      if (domainObj.color) existing.color = domainObj.color;
+      existing.name = formattedName;
+    } else {
+      this.domains.push({ name: formattedName, color: domainObj.color });
     }
+    this.renderDomainChips();
+    this.syncSelection();
+  }
+
+  updateDomain(originalName, updatedObj) {
+    if (!updatedObj || !updatedObj.name) return;
+    const prevKey = String(originalName || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    const nextKey = updatedObj.name.replace(/\s+/g, ' ').trim().toLowerCase();
+    const formattedName = updatedObj.name.trim().split(/\s+/).filter(Boolean).join('\n').toLowerCase();
+
+    const idx = this.domains.findIndex(
+      (d) => d.name.replace(/\s+/g, ' ').trim().toLowerCase() === prevKey
+    );
+    if (idx >= 0) {
+      const dupIdx = this.domains.findIndex(
+        (d, i) => i !== idx && d.name.replace(/\s+/g, ' ').trim().toLowerCase() === nextKey
+      );
+      if (dupIdx >= 0) this.domains.splice(dupIdx, 1);
+      const refreshedIdx = this.domains.findIndex(
+        (d) => d.name.replace(/\s+/g, ' ').trim().toLowerCase() === prevKey
+      );
+      if (refreshedIdx >= 0) {
+        this.domains[refreshedIdx] = { name: formattedName, color: updatedObj.color };
+      }
+    } else {
+      this.domains.push({ name: formattedName, color: updatedObj.color });
+    }
+
+    if (this.selectedOptions.domains.has(prevKey) && prevKey !== nextKey) {
+      this.selectedOptions.domains.delete(prevKey);
+      this.selectedOptions.domains.add(nextKey);
+    }
+
+    this.renderDomainChips();
+    this.syncSelection();
   }
 
   setEdge(edge) {
@@ -360,7 +398,8 @@ export class SortButton {
       chipEl.setAttribute('data-group', 'domains');
       chipEl.title = `Filter by ${optionKey}`;
 
-      const comp = DomainType.compute(item.name, {
+      const displayLabel = item.name.trim().split(/\s+/).filter(Boolean).join('\n').toLowerCase();
+      const comp = DomainType.compute(displayLabel, {
         mode,
         align: mode === 'center' ? 'center' : 'left',
         outlineWidth: 0.5,
